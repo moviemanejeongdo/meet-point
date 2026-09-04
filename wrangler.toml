@@ -1,0 +1,11 @@
+name = "meet-point"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "meetpoint-db"
+database_id = "local-meetpoint-db"
+
+[vars]
+KAKAO_REST_API_KEY = "dfaa3019f689dd580f6c8c5b561d61bb"
