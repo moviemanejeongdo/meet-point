@@ -1,4 +1,5 @@
 import { Env } from '../../_types';
+import { enrichParticipantsWithDistances } from '../../_calc';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
@@ -46,6 +47,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       }
     }
 
+    let enrichedParticipants = participants || [];
+    if (midpointResult && midpointResult.center_lat && midpointResult.center_lng) {
+      enrichedParticipants = enrichParticipantsWithDistances(
+        enrichedParticipants,
+        midpointResult.center_lat,
+        midpointResult.center_lng
+      );
+    }
+
     return new Response(
       JSON.stringify({
         id: room.id,
@@ -54,7 +64,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         created_at: room.created_at,
         expires_at: room.expires_at,
         midpoint_result: midpointResult,
-        participants: participants || [],
+        participants: enrichedParticipants,
       }),
       {
         status: 200,

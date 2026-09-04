@@ -254,8 +254,8 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           const ease = 1 - Math.pow(1 - rawProgress, 3);
 
           lineObjects.forEach(({ polyline, startLat, startLng, endLat, endLng }) => {
-            const curLat = startLat + (endLat - startLat) * ease;
-            const curLng = startLng + (endLng - startLng) * ease;
+            const curLat = rawProgress >= 1 ? endLat : startLat + (endLat - startLat) * ease;
+            const curLng = rawProgress >= 1 ? endLng : startLng + (endLng - startLng) * ease;
             polyline.setPath([
               new window.kakao.maps.LatLng(startLat, startLng),
               new window.kakao.maps.LatLng(curLat, curLng),
@@ -264,6 +264,8 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
 
           if (rawProgress < 1) {
             animationFrameRef.current = requestAnimationFrame(animateLines);
+          } else {
+            animationFrameRef.current = null;
           }
         };
 

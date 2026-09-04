@@ -20,30 +20,75 @@ export function estimateDurationMinutes(meters: number): number {
 export function calculateGeometricCenter(participants: any[]): { lat: number; lng: number } {
   if (participants.length === 0) return { lat: 37.5665, lng: 126.978 };
   if (participants.length === 1) return { lat: participants[0].lat, lng: participants[0].lng };
+  if (participants.length === 2) {
+    return {
+      lat: (participants[0].lat + participants[1].lat) / 2,
+      lng: (participants[0].lng + participants[1].lng) / 2,
+    };
+  }
 
+  // 1. 산술 평균을 시작점으로 설정
   let curLat = participants.reduce((sum, p) => sum + p.lat, 0) / participants.length;
   let curLng = participants.reduce((sum, p) => sum + p.lng, 0) / participants.length;
 
-  for (let iter = 0; iter < 10; iter++) {
-    let weightSum = 0;
-    let newLat = 0;
-    let newLng = 0;
-
+  // 목적 함수: 최대 이동거리 최소화(70%) + 이동거리 편차 최소화(30%)
+  const evaluate = (lat: number, lng: number) => {
+    let maxD = -Infinity;
+    let minD = Infinity;
     for (const p of participants) {
-      const dist = calculateDistanceMeters(curLat, curLng, p.lat, p.lng);
-      const weight = 1 / Math.max(10, dist);
-      weightSum += weight;
-      newLat += p.lat * weight;
-      newLng += p.lng * weight;
+      const d = calculateDistanceMeters(lat, lng, p.lat, p.lng);
+      if (d > maxD) maxD = d;
+      if (d < minD) minD = d;
     }
+    return maxD * 0.7 + (maxD - minD) * 0.3;
+  };
 
-    if (weightSum > 0) {
-      curLat = newLat / weightSum;
-      curLng = newLng / weightSum;
+  let bestScore = evaluate(curLat, curLng);
+
+  // 다단계 적응형 방향 탐색으로 공평 중심점 수렴
+  let step = 0.05;
+  for (let round = 0; round < 4; round++) {
+    let improved = true;
+    while (improved) {
+      improved = false;
+      const directions = [
+        [step, 0], [-step, 0], [0, step], [0, -step],
+        [step, step], [step, -step], [-step, step], [-step, -step],
+      ];
+
+      for (const [dLat, dLng] of directions) {
+        const nextLat = curLat + dLat;
+        const nextLng = curLng + dLng;
+        const score = evaluate(nextLat, nextLng);
+        if (score < bestScore) {
+          bestScore = score;
+          curLat = nextLat;
+          curLng = nextLng;
+          improved = true;
+          break;
+        }
+      }
     }
+    step /= 5;
   }
 
   return { lat: curLat, lng: curLng };
+}
+
+export function enrichParticipantsWithDistances(
+  participants: any[],
+  centerLat: number,
+  centerLng: number
+): any[] {
+  return participants.map((p) => {
+    const dist = calculateDistanceMeters(p.lat, p.lng, centerLat, centerLng);
+    const duration = estimateDurationMinutes(dist);
+    return {
+      ...p,
+      distance_meters: dist,
+      duration_minutes: duration,
+    };
+  });
 }
 
 export async function searchKakaoCategoryServer(

@@ -14,6 +14,7 @@ import {
 import { KakaoMap } from '../components/KakaoMap';
 import { ShareBar } from '../components/ShareBar';
 import { MidpointSummary } from '../components/MidpointSummary';
+import { enrichParticipantsWithDistances } from '../utils/midpoint';
 import { ParticipantOnboarding } from '../components/ParticipantOnboarding';
 import { EditProfileModal } from '../components/EditProfileModal';
 
@@ -60,7 +61,19 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
         }
       }
 
-      setRoom(data);
+      let processedData = data;
+      if (data.midpoint_result && data.participants) {
+        processedData = {
+          ...data,
+          participants: enrichParticipantsWithDistances(
+            data.participants,
+            data.midpoint_result.center_lat,
+            data.midpoint_result.center_lng
+          ),
+        };
+      }
+
+      setRoom(processedData);
     } catch (err: any) {
       if (err?.message?.includes('만료') || err?.message?.includes('종료')) {
         alert(err.message);
