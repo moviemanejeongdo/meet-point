@@ -20,7 +20,9 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
     }
   }, []);
 
-  const shareUrl = window.location.href;
+  const shareUrl = window.location.origin.includes('pages.dev')
+    ? window.location.href
+    : `https://meet-point-aql.pages.dev/room/${room.id}`;
 
   const handleCopyLink = async () => {
     try {

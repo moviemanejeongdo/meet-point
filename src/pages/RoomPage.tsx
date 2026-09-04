@@ -14,9 +14,15 @@ import {
 import { KakaoMap } from '../components/KakaoMap';
 import { ShareBar } from '../components/ShareBar';
 import { MidpointSummary } from '../components/MidpointSummary';
-import { enrichParticipantsWithDistances } from '../utils/midpoint';
+import { MidpointModeSelector } from '../components/MidpointModeSelector';
+import {
+  enrichParticipantsWithDistances,
+  computeFullMidpointResult,
+  resolveModeMidpoint,
+} from '../utils/midpoint';
 import { ParticipantOnboarding } from '../components/ParticipantOnboarding';
 import { EditProfileModal } from '../components/EditProfileModal';
+import type { MidpointMode } from '../types';
 
 interface RoomPageProps {
   roomId: string;
@@ -29,6 +35,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   const [selectedPlace, setSelectedPlace] = useState<PlaceItem | null>(null);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<'map' | 'info'>('map');
+  const [midpointMode, setMidpointMode] = useState<MidpointMode>('transit');
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth <= 768);
   const [myParticipantId, setMyParticipantId] = useState<string | null>(() => getStoredParticipantId(roomId));
 
@@ -40,6 +47,91 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const midpointModeRef = React.useRef<MidpointMode>(midpointMode);
+  useEffect(() => {
+    midpointModeRef.current = midpointMode;
+  }, [midpointMode]);
+
+  // 중간지점 계산 모드 변경 핸들러 (대중교통, 지도 중앙, 도보, 자동차)
+  const handleSelectMode = async (newMode: MidpointMode) => {
+    setMidpointMode(newMode);
+    midpointModeRef.current = newMode;
+    if (!room || room.participants.length < 2) return;
+
+    // 1. 기존 subways 풀을 활용하여 새 모드의 최적 도착점(역 명칭 및 좌표)을 즉각 확정!
+    const resolved = resolveModeMidpoint(
+      room.participants,
+      newMode,
+      room.midpoint_result?.subways
+    );
+
+    setRoom((prev) => {
+      if (!prev) return prev;
+      const currentMid = prev.midpoint_result;
+      return {
+        ...prev,
+        midpoint_result: currentMid
+          ? {
+              ...currentMid,
+              center_lat: resolved.center_lat,
+              center_lng: resolved.center_lng,
+              center_name: resolved.center_name,
+              subways: resolved.sortedSubways.length > 0 ? resolved.sortedSubways : currentMid.subways,
+            }
+          : {
+              center_lat: resolved.center_lat,
+              center_lng: resolved.center_lng,
+              center_name: resolved.center_name,
+              calculated_at: Date.now(),
+              subways: resolved.sortedSubways,
+              landmarks: [],
+              cafes: [],
+              restaurants: [],
+            },
+        participants: enrichParticipantsWithDistances(
+          prev.participants,
+          resolved.center_lat,
+          resolved.center_lng,
+          newMode
+        ),
+      };
+    });
+
+    // 2. 비동기로 4대 추천 장소(지하철역, 랜드마크, 카페, 음식점) 검색 및 장소 보강
+    try {
+      const modeResult = await computeFullMidpointResult(room.participants, undefined, newMode);
+      if (modeResult) {
+        setRoom((prev) => {
+          if (!prev) return prev;
+          if (midpointModeRef.current !== newMode) return prev;
+          const reResolved = resolveModeMidpoint(
+            prev.participants,
+            newMode,
+            modeResult.subways
+          );
+          return {
+            ...prev,
+            midpoint_result: {
+              ...modeResult,
+              center_lat: reResolved.center_lat,
+              center_lng: reResolved.center_lng,
+              center_name: reResolved.center_name,
+              subways: reResolved.sortedSubways,
+            },
+            participants: enrichParticipantsWithDistances(
+              prev.participants,
+              reResolved.center_lat,
+              reResolved.center_lng,
+              newMode
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      console.error('중간지점 모드 재계산 오류:', e);
+    }
+  };
 
   // 방 정보 조회 및 주기적 폴링
   const fetchRoomData = useCallback(async () => {
@@ -62,13 +154,31 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
       }
 
       let processedData = data;
-      if (data.midpoint_result && data.participants) {
+      const currentMode = midpointModeRef.current;
+
+      if (data.participants && data.participants.length >= 2) {
+        const resolved = resolveModeMidpoint(
+          data.participants,
+          currentMode,
+          data.midpoint_result?.subways
+        );
+
         processedData = {
           ...data,
+          midpoint_result: data.midpoint_result
+            ? {
+                ...data.midpoint_result,
+                center_lat: resolved.center_lat,
+                center_lng: resolved.center_lng,
+                center_name: resolved.center_name,
+                subways: resolved.sortedSubways.length > 0 ? resolved.sortedSubways : data.midpoint_result.subways,
+              }
+            : null,
           participants: enrichParticipantsWithDistances(
             data.participants,
-            data.midpoint_result.center_lat,
-            data.midpoint_result.center_lng
+            resolved.center_lat,
+            resolved.center_lng,
+            currentMode
           ),
         };
       }
@@ -215,7 +325,15 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
       {/* 1. 공유 바 */}
       <ShareBar room={room} />
 
-      {/* 2. 중간지점 요약 및 4대 추천 탭 */}
+      {/* 2. 중간지점 계산 모드 선택기 (콜랩스 아코디언) */}
+      {room.participants.length >= 2 && (
+        <MidpointModeSelector
+          currentMode={midpointMode}
+          onSelectMode={handleSelectMode}
+        />
+      )}
+
+      {/* 3. 중간지점 요약 및 4대 추천 탭 */}
       <MidpointSummary
         midpointResult={room.midpoint_result || null}
         participants={room.participants}
@@ -437,9 +555,28 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
         {/* 지도 영역 (데스크톱에서는 상시 표시, 모바일에서는 map 탭일 때 표시) */}
         {(!isMobile || mobileTab === 'map') && (
           <main style={{ flex: 1, position: 'relative', height: '100%', width: '100%' }}>
+            {/* 모바일 지도 화면 상단 플로팅 기준 변경 선택기 */}
+            {isMobile && room.participants.length >= 2 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  right: 10,
+                  zIndex: 30,
+                }}
+              >
+                <MidpointModeSelector
+                  currentMode={midpointMode}
+                  onSelectMode={handleSelectMode}
+                />
+              </div>
+            )}
+
             <KakaoMap
               participants={room.participants}
               midpointResult={room.midpoint_result || null}
+              mode={midpointMode}
               selectedPlace={selectedPlace}
               onSelectPlace={(place) => setSelectedPlace(place)}
             />

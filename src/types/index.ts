@@ -54,6 +54,16 @@ export interface CreateRoomResponse {
   participant_id: string;
 }
 
+export type MidpointMode = 'transit' | 'centroid' | 'walking' | 'driving';
+
+export interface MidpointModeOption {
+  key: MidpointMode;
+  icon: string;
+  label: string;
+  badge: string;
+  description: string;
+}
+
 export interface AddParticipantResponse {
   participant_id: string;
   room: Room;

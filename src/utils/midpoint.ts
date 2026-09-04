@@ -1,4 +1,35 @@
-import type { Participant, MidpointResult, PlaceItem } from '../types';
+import type { Participant, MidpointResult, PlaceItem, MidpointMode, MidpointModeOption } from '../types';
+
+export const MIDPOINT_MODES: MidpointModeOption[] = [
+  {
+    key: 'transit',
+    icon: '🚇',
+    label: '대중교통 기준',
+    badge: '추천 (기본)',
+    description: '지하철·버스 환승과 이동 시간을 고려한 역세권 공평 중심',
+  },
+  {
+    key: 'centroid',
+    icon: '📍',
+    label: '지도 중앙 기준',
+    badge: '기하학 중심',
+    description: '모든 출발 위치의 지도 위도·경도 좌표를 산술 평균한 수학적 중간점',
+  },
+  {
+    key: 'walking',
+    icon: '🚶',
+    label: '도보 기준',
+    badge: '보행 친화',
+    description: '걸어서 이동할 때 체감 거리가 가장 짧고 고른 보행 친화적 중간점',
+  },
+  {
+    key: 'driving',
+    icon: '🚗',
+    label: '자동차 운전 기준',
+    badge: '차량 주행',
+    description: '도심 도로망과 간선도로 주행 접근성을 고려한 운전 기준 중간점',
+  },
+];
 
 // 위도/경도 두 점 사이의 직선 거리(미터)를 계산하는 Haversine 공식
 export function calculateDistanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -23,15 +54,35 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1)}km`;
 }
 
-// 도심 대중교통/차량 기준 대략적인 예상 소요시간(분) 추정
-export function estimateDurationMinutes(meters: number): number {
-  // 평균 도심 이동 속도 22km/h 기준 + 기본 대기/도보 5분
+// 이동 모드별 대략적인 예상 소요시간(분) 추정
+export function estimateDurationMinutes(meters: number, mode: MidpointMode = 'transit'): number {
+  if (mode === 'walking') {
+    // 도보: 평균 시속 4.5km/h
+    return Math.max(1, Math.round((meters / 4500) * 60));
+  }
+  if (mode === 'driving') {
+    // 차량 운전: 도심 시속 32km/h + 기본 대기 3분
+    return Math.max(3, Math.round((meters / 32000) * 60 + 3));
+  }
+  // 대중교통 및 지도 중앙 (기본): 시속 22km/h + 환승/대기 5분
   const travelMinutes = (meters / 22000) * 60;
   return Math.max(5, Math.round(travelMinutes + 5));
 }
 
-// 참가자 좌표들의 공평한 최적 중간점 계산 (최대 이동거리 최소화 + 이동거리 편차 최소화)
-export function calculateGeometricCenter(participants: Participant[]): { lat: number; lng: number } {
+// 도보 보행 시 골목길/블록을 고려한 맨해튼(L1) 거리 계산
+export function calculateManhattanMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const dLatMeters = Math.abs(lat2 - lat1) * (Math.PI / 180) * R;
+  const avgLat = ((lat1 + lat2) / 2) * (Math.PI / 180);
+  const dLngMeters = Math.abs(lng2 - lng1) * (Math.PI / 180) * R * Math.cos(avgLat);
+  return Math.round(dLatMeters + dLngMeters);
+}
+
+// 이동 모드별 중간점 계산
+export function calculateGeometricCenterByMode(
+  participants: Participant[],
+  mode: MidpointMode = 'transit'
+): { lat: number; lng: number } {
   if (participants.length === 0) {
     return { lat: 37.5665, lng: 126.9780 }; // 기본 서울 시청
   }
@@ -45,12 +96,116 @@ export function calculateGeometricCenter(participants: Participant[]): { lat: nu
     };
   }
 
-  // 1. 산술 평균을 시작점으로 설정
+  // 1. 지도 중앙 기준 (centroid): 모든 위치 좌표의 순수 산술 평균 무게중심
+  if (mode === 'centroid') {
+    return {
+      lat: participants.reduce((sum, p) => sum + p.lat, 0) / participants.length,
+      lng: participants.reduce((sum, p) => sum + p.lng, 0) / participants.length,
+    };
+  }
+
+  // 2. 도보 기준 (walking): L1 맨해튼 거리(실제 골목/보도블록 보행)와 총 피로도 최소화 (Fermat-Weber Median)
+  if (mode === 'walking') {
+    const lats = participants.map((p) => p.lat).sort((a, b) => a - b);
+    const lngs = participants.map((p) => p.lng).sort((a, b) => a - b);
+    const midIdx = Math.floor(participants.length / 2);
+    let curLat = participants.length % 2 === 1 ? lats[midIdx] : (lats[midIdx - 1] + lats[midIdx]) / 2;
+    let curLng = participants.length % 2 === 1 ? lngs[midIdx] : (lngs[midIdx - 1] + lngs[midIdx]) / 2;
+
+    const evalWalking = (lat: number, lng: number) => {
+      let totalL1 = 0;
+      let maxL1 = -Infinity;
+      let minL1 = Infinity;
+      for (const p of participants) {
+        const d = calculateManhattanMeters(lat, lng, p.lat, p.lng);
+        totalL1 += d;
+        if (d > maxL1) maxL1 = d;
+        if (d < minL1) minL1 = d;
+      }
+      // 보행은 전체 걸음 수(총 거리) 50% + 가장 먼 사람의 부담 50%를 최소화
+      return (totalL1 / participants.length) * 0.5 + maxL1 * 0.5;
+    };
+
+    let bestScore = evalWalking(curLat, curLng);
+    let step = 0.02;
+    for (let round = 0; round < 4; round++) {
+      let improved = true;
+      while (improved) {
+        improved = false;
+        const directions = [
+          [step, 0], [-step, 0], [0, step], [0, -step],
+          [step, step], [step, -step], [-step, step], [-step, -step],
+        ];
+        for (const [dLat, dLng] of directions) {
+          const nextLat = curLat + dLat;
+          const nextLng = curLng + dLng;
+          const score = evalWalking(nextLat, nextLng);
+          if (score < bestScore) {
+            bestScore = score;
+            curLat = nextLat;
+            curLng = nextLng;
+            improved = true;
+            break;
+          }
+        }
+      }
+      step /= 4;
+    }
+    return { lat: curLat, lng: curLng };
+  }
+
+  // 3. 자동차 운전 기준 (driving): 주요 간선도로망 및 고속화도로 주행시간 최적화
+  if (mode === 'driving') {
+    let curLat = participants.reduce((sum, p) => sum + p.lat, 0) / participants.length;
+    let curLng = participants.reduce((sum, p) => sum + p.lng, 0) / participants.length;
+
+    const evalDriving = (lat: number, lng: number) => {
+      let maxTime = -Infinity;
+      let minTime = Infinity;
+      for (const p of participants) {
+        const dist = calculateDistanceMeters(lat, lng, p.lat, p.lng);
+        // 장거리(고속화도로/외곽)는 45km/h, 근거리(도심 신호대기)는 26km/h 가중치
+        const speed = dist > 11000 ? 45000 / 60 : 26000 / 60; // meters per minute
+        const travelMin = dist / speed;
+        if (travelMin > maxTime) maxTime = travelMin;
+        if (travelMin < minTime) minTime = travelMin;
+      }
+      return maxTime * 0.8 + (maxTime - minTime) * 0.2;
+    };
+
+    let bestScore = evalDriving(curLat, curLng);
+    let step = 0.02;
+    for (let round = 0; round < 4; round++) {
+      let improved = true;
+      while (improved) {
+        improved = false;
+        const directions = [
+          [step, 0], [-step, 0], [0, step], [0, -step],
+          [step, step], [step, -step], [-step, step], [-step, -step],
+        ];
+        for (const [dLat, dLng] of directions) {
+          const nextLat = curLat + dLat;
+          const nextLng = curLng + dLng;
+          const score = evalDriving(nextLat, nextLng);
+          if (score < bestScore) {
+            bestScore = score;
+            curLat = nextLat;
+            curLng = nextLng;
+            improved = true;
+            break;
+          }
+        }
+      }
+      step /= 4;
+    }
+    return { lat: curLat, lng: curLng };
+  }
+
+  // 4. 대중교통 기준 (transit - 디폴트): 지하철 환승/접근성 Minimax 공평점
   let curLat = participants.reduce((sum, p) => sum + p.lat, 0) / participants.length;
   let curLng = participants.reduce((sum, p) => sum + p.lng, 0) / participants.length;
 
-  // 목적 함수: 최대 이동거리 최소화(70%) + 이동거리 편차 최소화(30%)
-  const evaluate = (lat: number, lng: number) => {
+  const evalTransit = (lat: number, lng: number) => {
     let maxD = -Infinity;
     let minD = Infinity;
     for (const p of participants) {
@@ -61,9 +216,7 @@ export function calculateGeometricCenter(participants: Participant[]): { lat: nu
     return maxD * 0.7 + (maxD - minD) * 0.3;
   };
 
-  let bestScore = evaluate(curLat, curLng);
-
-  // 다단계 적응형 방향 탐색으로 공평 중심점 수렴
+  let bestScore = evalTransit(curLat, curLng);
   let step = 0.05;
   for (let round = 0; round < 4; round++) {
     let improved = true;
@@ -73,11 +226,10 @@ export function calculateGeometricCenter(participants: Participant[]): { lat: nu
         [step, 0], [-step, 0], [0, step], [0, -step],
         [step, step], [step, -step], [-step, step], [-step, -step],
       ];
-
       for (const [dLat, dLng] of directions) {
         const nextLat = curLat + dLat;
         const nextLng = curLng + dLng;
-        const score = evaluate(nextLat, nextLng);
+        const score = evalTransit(nextLat, nextLng);
         if (score < bestScore) {
           bestScore = score;
           curLat = nextLat;
@@ -89,8 +241,12 @@ export function calculateGeometricCenter(participants: Participant[]): { lat: nu
     }
     step /= 5;
   }
-
   return { lat: curLat, lng: curLng };
+}
+
+// 하위 호환성 유지용 함수 (기본 대중교통 모드)
+export function calculateGeometricCenter(participants: Participant[]): { lat: number; lng: number } {
+  return calculateGeometricCenterByMode(participants, 'transit');
 }
 
 // 카카오 로컬 카테고리 검색 API 호출 (REST API 키 사용)
@@ -176,13 +332,14 @@ export async function searchKakaoKeyword(
 // 참가자 목록을 받아 완전한 중간지점 및 추천 스팟(지하철역, 랜드마크, 카페, 음식점) 산출
 export async function computeFullMidpointResult(
   participants: Participant[],
-  apiKey = 'dfaa3019f689dd580f6c8c5b561d61bb'
+  apiKey = 'dfaa3019f689dd580f6c8c5b561d61bb',
+  mode: MidpointMode = 'transit'
 ): Promise<MidpointResult | null> {
   if (participants.length < 2) {
     return null;
   }
 
-  const { lat, lng } = calculateGeometricCenter(participants);
+  const { lat, lng } = calculateGeometricCenterByMode(participants, mode);
 
   // 병렬로 4대 카테고리 검색 (SW8=지하철역, AT4=관광명소/문화시설, CE7=카페, FD6=음식점)
   const [subways, landmarks, cafes, restaurants] = await Promise.all([
@@ -218,11 +375,12 @@ export async function computeFullMidpointResult(
 export function enrichParticipantsWithDistances(
   participants: Participant[],
   centerLat: number,
-  centerLng: number
+  centerLng: number,
+  mode: MidpointMode = 'transit'
 ): Participant[] {
   return participants.map((p) => {
     const dist = calculateDistanceMeters(p.lat, p.lng, centerLat, centerLng);
-    const duration = estimateDurationMinutes(dist);
+    const duration = estimateDurationMinutes(dist, mode);
     return {
       ...p,
       distance_meters: dist,
@@ -230,3 +388,55 @@ export function enrichParticipantsWithDistances(
     };
   });
 }
+
+// 모드별 중심 좌표 및 기존 지하철역/장소 풀을 매칭하여 확정 도착점 산출
+export function resolveModeMidpoint(
+  participants: Participant[],
+  mode: MidpointMode,
+  existingSubways?: PlaceItem[]
+): {
+  center_lat: number;
+  center_lng: number;
+  center_name: string;
+  sortedSubways: PlaceItem[];
+} {
+  const rawCenter = calculateGeometricCenterByMode(participants, mode);
+
+  if (!existingSubways || existingSubways.length === 0) {
+    return {
+      center_lat: rawCenter.lat,
+      center_lng: rawCenter.lng,
+      center_name: '중간 지점',
+      sortedSubways: [],
+    };
+  }
+
+  // 각 지하철역과의 거리 계산 및 오름차순 정렬
+  const sortedSubways = existingSubways
+    .map((s) => ({
+      ...s,
+      distance: String(calculateDistanceMeters(rawCenter.lat, rawCenter.lng, Number(s.y), Number(s.x))),
+    }))
+    .sort((a, b) => Number(a.distance) - Number(b.distance));
+
+  const nearest = sortedSubways[0];
+
+  // 1. 지도 중앙(centroid): 순수 산술 평균 좌표에 핀을 꽂음
+  if (mode === 'centroid') {
+    return {
+      center_lat: rawCenter.lat,
+      center_lng: rawCenter.lng,
+      center_name: `${nearest.place_name} 부근`,
+      sortedSubways,
+    };
+  }
+
+  // 2. 대중교통, 도보, 자동차: 해당 모드의 최적 역 좌표로 핀과 선 모션을 완벽히 스냅 일체화!
+  return {
+    center_lat: Number(nearest.y),
+    center_lng: Number(nearest.x),
+    center_name: `${nearest.place_name} 부근`,
+    sortedSubways,
+  };
+}
+
