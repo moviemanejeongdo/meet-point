@@ -60,7 +60,7 @@ export async function createRoom(title: string, hostName: string, hostLat: numbe
     title: title || '즐거운 모임',
     status: 'gathering',
     created_at: Date.now(),
-    expires_at: Date.now() + 24 * 60 * 60 * 1000,
+    expires_at: Date.now() + 3 * 24 * 60 * 60 * 1000,
     participants: [initialHost],
     midpoint_result: null,
   };

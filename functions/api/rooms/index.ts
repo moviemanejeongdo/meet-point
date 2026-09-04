@@ -17,7 +17,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const hostToken = 'token-' + crypto.randomUUID();
     const hostParticipantId = 'pid-' + crypto.randomUUID();
     const now = Date.now();
-    const expiresAt = now + 24 * 60 * 60 * 1000; // 24시간 뒤 만료
+    const expiresAt = now + 3 * 24 * 60 * 60 * 1000; // 3일(72시간) 뒤 만료
 
     // D1 트랜잭션 또는 배치 실행
     await env.DB.batch([
