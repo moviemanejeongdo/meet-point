@@ -23,9 +23,6 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
   // 카카오 디벨로퍼스에 등록된 공식 프로덕션 도메인
   const CANONICAL_ORIGIN = 'https://meet-point-aql.pages.dev';
 
-  // 카카오톡 공유용: 공식 도메인 고정 + 경로와 쿼리(?room=방ID)를 이중 전달하여 인앱 브라우저의 경로 유실 완벽 차단
-  const kakaoShareUrl = `${CANONICAL_ORIGIN}/room/${room.id}?room=${room.id}`;
-
   // 링크 복사용 깔끔한 공식 URL
   const copyRoomUrl = `${CANONICAL_ORIGIN}/room/${room.id}`;
 
@@ -48,9 +45,24 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
     }
   };
 
-  const handleKakaoShare = () => {
+  const handleKakaoShare = async () => {
+    // 카카오 서버의 도메인 화이트리스트 검증을 100% 통과하는 순수 정규 URL
+    const kakaoShareUrl = `${CANONICAL_ORIGIN}/room/${room.id}`;
+
     if (!window.Kakao) {
-      alert('카카오 SDK를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `[얼중간 초대] ${room.title}`,
+            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${kakaoShareUrl}\n출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+            url: kakaoShareUrl,
+          });
+          return;
+        } catch (e) {
+          // ignore
+        }
+      }
+      handleCopyLink();
       return;
     }
 
@@ -63,8 +75,10 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
         objectType: 'feed',
         content: {
           title: `[얼중간 초대] ${room.title}`,
-          description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${copyRoomUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+          description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${kakaoShareUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
           imageUrl: `${CANONICAL_ORIGIN}/app-icon.png`,
+          imageWidth: 800,
+          imageHeight: 420,
           link: {
             mobileWebUrl: kakaoShareUrl,
             webUrl: kakaoShareUrl,
@@ -82,6 +96,18 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
       });
     } catch (err) {
       console.error('Kakao share error:', err);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `[얼중간 초대] ${room.title}`,
+            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${copyRoomUrl}`,
+            url: copyRoomUrl,
+          });
+          return;
+        } catch (e) {
+          // ignore
+        }
+      }
       handleCopyLink();
     }
   };
