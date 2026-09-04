@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, Users, MapPin, User, LogOut, Trash2, Map, List, Edit3 } from 'lucide-react';
+import { ChevronLeft, Users, MapPin, User, LogOut, Trash2, Map, List, Edit3, MessageCircle } from 'lucide-react';
 import type { Room, PlaceItem } from '../types';
 import {
   getRoom,
@@ -467,6 +467,45 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   style={{ flexShrink: 0, padding: '7px 12px', fontSize: 12 }}
                 >
                   상세 보기
+                </button>
+              </div>
+            )}
+
+            {/* 모바일 지도 하단 1인 상태 대기 플로팅 카드 */}
+            {isMobile && !room.midpoint_result && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 16,
+                  left: 12,
+                  right: 12,
+                  padding: '14px 16px',
+                  background: 'rgba(15, 23, 42, 0.94)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                  zIndex: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>👑</span> 방장 출발 위치 등록 완료
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>현재 1명 참여 중</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
+                  친구가 1명 이상 링크로 참여하면 실시간으로 가장 공평한 중간 장소와 주변 추천 핫플이 자동 계산됩니다!
+                </div>
+                <button
+                  onClick={() => setMobileTab('info')}
+                  className="btn btn-kakao btn-sm"
+                  style={{ width: '100%', padding: '9px 0', fontSize: 13, gap: 5 }}
+                >
+                  <MessageCircle size={15} /> 친구 초대하기 (카톡 공유)
                 </button>
               </div>
             )}
