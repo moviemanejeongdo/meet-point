@@ -72,21 +72,38 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
           {midpointResult.center_name}
         </h3>
 
-        {/* 참가자별 거리 & 예상 이동 시간 태그 */}
+        {/* 참가자별 거리 & 예상 이동 시간 태그 (클릭 시 카카오맵 길찾기 연결) */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {participants.map((p) => (
-            <div
+            <button
               key={p.id}
+              onClick={() => {
+                const origin = p.address_name || p.name;
+                const dest = midpointResult.center_name;
+                const url = `https://map.kakao.com/?sName=${encodeURIComponent(origin)}&eName=${encodeURIComponent(dest)}`;
+                window.open(url, '_blank');
+              }}
+              title={`${p.name}의 카카오맵 길찾기 열기`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '4px 10px',
+                padding: '5px 10px',
                 background: 'rgba(15, 23, 42, 0.6)',
                 borderRadius: 'var(--radius-full)',
                 fontSize: 12,
                 color: 'var(--text-secondary)',
                 border: '1px solid var(--border-color)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent-cyan)';
+                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
               }}
             >
               <span style={{ fontWeight: 600, color: '#f8fafc' }}>{p.name}:</span>
@@ -96,7 +113,8 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
                   <Clock size={11} /> 약 {p.duration_minutes}분
                 </span>
               ) : null}
-            </div>
+              <ExternalLink size={10} color="var(--text-muted)" style={{ marginLeft: 2 }} />
+            </button>
           ))}
         </div>
       </div>

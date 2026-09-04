@@ -196,7 +196,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
 
     // 0. 렌더링 데이터 변경 여부 검사 (불필요한 마커 재생성 및 3초 폴링 주기 리로드 원천 차단)
     const currentRenderKey = JSON.stringify({
-      p: participants.map((p) => [p.id, p.lat, p.lng, p.name, p.distance_meters, p.is_host]),
+      p: participants.map((p) => [p.id, p.lat, p.lng, p.name, p.distance_meters, p.duration_minutes, p.is_host]),
       m: midpointResult ? [midpointResult.center_lat, midpointResult.center_lng, midpointResult.center_name] : null,
       mode,
       sp: selectedPlace ? selectedPlace.id : null,
@@ -277,7 +277,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           z-index: 3;
         ">
           ${isHost ? '👑 ' : ''}${p.name}
-          ${p.distance_meters ? `<span style="color:#94a3b8;font-size:11px;">(${Math.round(p.distance_meters / 100) / 10}km)</span>` : ''}
+          ${p.distance_meters ? `<span style="color:#94a3b8;font-size:11px;">(${Math.round(p.distance_meters / 100) / 10}km${p.duration_minutes ? `, 약 ${p.duration_minutes}분` : ''})</span>` : ''}
         </div>
         <div style="
           position: absolute;

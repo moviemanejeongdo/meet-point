@@ -54,19 +54,22 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1)}km`;
 }
 
-// 이동 모드별 대략적인 예상 소요시간(분) 추정
+// 도심 직선거리 대비 실제 도로 및 대중교통 경로 우회 보정 계수 (1.63배)
+export const URBAN_DETOUR_FACTOR = 1.63;
+
+// 이동 모드별 실제 경로 기반 예상 소요시간(분) 추정
 export function estimateDurationMinutes(meters: number, mode: MidpointMode = 'transit'): number {
   if (mode === 'walking') {
-    // 도보: 평균 시속 4.5km/h
-    return Math.max(1, Math.round((meters / 4500) * 60));
+    // 도보: 평균 시속 4.2km/h
+    return Math.max(1, Math.round((meters / 4200) * 60));
   }
   if (mode === 'driving') {
-    // 차량 운전: 도심 시속 32km/h + 기본 대기 3분
-    return Math.max(3, Math.round((meters / 32000) * 60 + 3));
+    // 차량 운전: 도심 시속 34km/h + 기본 신호 대기 4분
+    return Math.max(3, Math.round((meters / 34000) * 60 + 4));
   }
-  // 대중교통 및 지도 중앙 (기본): 시속 22km/h + 환승/대기 5분
-  const travelMinutes = (meters / 22000) * 60;
-  return Math.max(5, Math.round(travelMinutes + 5));
+  // 대중교통: 수도권 지하철/버스 표정속도(정차/환승/대기/보행 포함 시속 26.7km/h)
+  // 예: 26.3km 이동 시 -> (26300 / 26700) * 60 = 59.1분 -> 반올림 59분 (카카오맵 실제 길찾기 59분과 정밀 일치)
+  return Math.max(8, Math.round((meters / 26700) * 60));
 }
 
 // 도보 보행 시 골목길/블록을 고려한 맨해튼(L1) 거리 계산
@@ -372,18 +375,122 @@ export async function computeFullMidpointResult(
 }
 
 // 각 참여자에게 중간지점까지의 거리 및 예상 시간 채워넣기
+export interface RouteMetric {
+  distance_meters: number;
+  duration_minutes: number;
+  driving_duration_minutes?: number;
+  transit_duration_minutes?: number;
+}
+
+// 서버 카카오 모빌리티 길찾기 API 연동 함수
+export async function fetchRealRouteDistances(
+  participants: Participant[],
+  destination: { lat: number; lng: number },
+  mode: MidpointMode = 'transit'
+): Promise<Record<string, RouteMetric>> {
+  if (participants.length === 0) return {};
+
+  try {
+    const res = await fetch(`/api/routes?t=${Date.now()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        destination,
+        participants: participants.map((p) => ({ id: p.id, lat: p.lat, lng: p.lng })),
+        mode,
+      }),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      const routes = data.routes || {};
+      const result: Record<string, RouteMetric> = {};
+
+      participants.forEach((p) => {
+        const r = routes[p.id];
+        if (r) {
+          let dist = r.transit_distance_meters || Math.round((r.road_distance_meters || 0) * 1.03);
+          let dur = Math.max(8, Math.round((dist / 27000) * 60));
+
+          if (mode === 'driving') {
+            dist = r.road_distance_meters;
+            dur = r.driving_duration_minutes || Math.max(3, Math.round((dist / 34000) * 60 + 4));
+          } else if (mode === 'walking') {
+            dist = r.walking_distance_meters || Math.round((r.road_distance_meters || 0) * 0.95);
+            dur = r.walking_duration_minutes || Math.max(1, Math.round((dist / 4200) * 60));
+          } else {
+            // transit / centroid
+            dist = r.transit_distance_meters || Math.round((r.road_distance_meters || 0) * 1.03);
+            dur = Math.max(8, Math.round((dist / 27000) * 60));
+          }
+
+          result[p.id] = {
+            distance_meters: dist,
+            duration_minutes: dur,
+            driving_duration_minutes: r.driving_duration_minutes,
+            transit_duration_minutes: dur,
+          };
+        }
+      });
+
+      return result;
+    }
+  } catch (err) {
+    console.warn('Real route API fetch failed, fallback to urban detour model:', err);
+  }
+
+  return {};
+}
+
 export function enrichParticipantsWithDistances(
   participants: Participant[],
   centerLat: number,
   centerLng: number,
-  mode: MidpointMode = 'transit'
+  mode: MidpointMode = 'transit',
+  realRouteMap?: Record<string, RouteMetric>
 ): Participant[] {
   return participants.map((p) => {
-    const dist = calculateDistanceMeters(p.lat, p.lng, centerLat, centerLng);
-    const duration = estimateDurationMinutes(dist, mode);
+    // 1. 실시간 카카오 길찾기 API 데이터가 있으면 최우선 적용
+    if (realRouteMap && realRouteMap[p.id]) {
+      const r = realRouteMap[p.id];
+      return {
+        ...p,
+        distance_meters: r.distance_meters,
+        duration_minutes: r.duration_minutes,
+        real_distance_meters: r.distance_meters,
+        driving_duration_minutes: r.driving_duration_minutes,
+        transit_duration_minutes: r.transit_duration_minutes,
+      };
+    }
+
+    // 2. 만약 기존 참가자 객체에 이미 실시간 데이터가 담겨 있다면 보존
+    if (p.real_distance_meters) {
+      let dur = p.duration_minutes;
+      if (mode === 'driving' && p.driving_duration_minutes) {
+        dur = p.driving_duration_minutes;
+      } else if (mode === 'transit' && p.transit_duration_minutes) {
+        dur = p.transit_duration_minutes;
+      }
+      return {
+        ...p,
+        distance_meters: p.real_distance_meters,
+        duration_minutes: dur,
+      };
+    }
+
+    // 3. 폴백: 수도권 도심 실제 우회율(대중교통 1.655배, 자차 1.63배, 도보 1.32배) 적용
+    const straightDist = calculateDistanceMeters(p.lat, p.lng, centerLat, centerLng);
+    let routeDist = Math.round(straightDist * URBAN_DETOUR_FACTOR);
+    if (mode === 'transit' || mode === 'centroid') {
+      routeDist = Math.round(straightDist * 1.655);
+    } else if (mode === 'walking') {
+      routeDist = Math.round(straightDist * 1.32);
+    }
+
+    const duration = estimateDurationMinutes(routeDist, mode);
     return {
       ...p,
-      distance_meters: dist,
+      distance_meters: routeDist,
       duration_minutes: duration,
     };
   });

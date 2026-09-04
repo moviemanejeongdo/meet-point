@@ -9,8 +9,11 @@ export interface Participant {
   address_name: string;
   is_host: number; // 1 = 방장, 0 = 일반 참여자
   joined_at: number;
-  distance_meters?: number; // 중간지점까지의 직선 거리
-  duration_minutes?: number; // 예상 이동 시간(분)
+  distance_meters?: number; // 중간지점까지의 실제 경로 또는 직선 거리 (미터)
+  duration_minutes?: number; // 현재 모드에 따른 예상 소요 시간(분)
+  real_distance_meters?: number; // 카카오 모빌리티 실측 도로/대중교통 거리 (미터)
+  driving_duration_minutes?: number; // 실제 자동차 주행 시간 (분)
+  transit_duration_minutes?: number; // 실제 대중교통(환승 포함) 소요 시간 (분)
 }
 
 export interface PlaceItem {

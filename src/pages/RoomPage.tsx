@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, Users, MapPin, User, LogOut, Trash2, Map, List, Edit3, MessageCircle } from 'lucide-react';
-import type { Room, PlaceItem } from '../types';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, Users, MapPin, User, LogOut, Trash2, Map, List, Edit3, MessageCircle, ExternalLink } from 'lucide-react';
+import type { Room, PlaceItem, Participant } from '../types';
 import {
   getRoom,
   addParticipant,
@@ -19,6 +19,7 @@ import {
   enrichParticipantsWithDistances,
   computeFullMidpointResult,
   resolveModeMidpoint,
+  fetchRealRouteDistances,
 } from '../utils/midpoint';
 import { ParticipantOnboarding } from '../components/ParticipantOnboarding';
 import { EditProfileModal } from '../components/EditProfileModal';
@@ -48,10 +49,60 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const midpointModeRef = React.useRef<MidpointMode>(midpointMode);
+  const midpointModeRef = useRef<MidpointMode>(midpointMode);
   useEffect(() => {
     midpointModeRef.current = midpointMode;
   }, [midpointMode]);
+
+  // 카카오 모빌리티 실시간 경로 API 중복 호출 방지 캐시 키
+  const lastRouteFetchKeyRef = useRef<string>('');
+
+  // 실시간 경로 거리/소요시간 비동기 백그라운드 갱신
+  const updateRealRoutes = useCallback(
+    async (
+      participants: Participant[],
+      destination: { lat: number; lng: number },
+      mode: MidpointMode
+    ) => {
+      if (participants.length < 2) return;
+      const fetchKey = `${destination.lat.toFixed(4)}_${destination.lng.toFixed(4)}_${mode}_${participants
+        .map((p) => `${p.id}:${p.lat.toFixed(4)},${p.lng.toFixed(4)}`)
+        .join('|')}`;
+
+      if (lastRouteFetchKeyRef.current === fetchKey) return;
+      lastRouteFetchKeyRef.current = fetchKey;
+
+      try {
+        const routeMap = await fetchRealRouteDistances(participants, destination, mode);
+        if (Object.keys(routeMap).length > 0) {
+          setRoom((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              participants: enrichParticipantsWithDistances(
+                prev.participants,
+                destination.lat,
+                destination.lng,
+                mode,
+                routeMap
+              ),
+            };
+          });
+        }
+      } catch (e) {
+        console.warn('Real route background fetch error:', e);
+      }
+    },
+    []
+  );
+
+  // 카카오맵 공식 길찾기 웹 페이지 열기
+  const handleOpenKakaoNavi = (participant: Participant, customDestName?: string) => {
+    const origin = participant.address_name || participant.name;
+    const dest = customDestName || room?.midpoint_result?.center_name || '중간 장소';
+    const url = `https://map.kakao.com/?sName=${encodeURIComponent(origin)}&eName=${encodeURIComponent(dest)}`;
+    window.open(url, '_blank');
+  };
 
   // 중간지점 계산 모드 변경 핸들러 (대중교통, 지도 중앙, 도보, 자동차)
   const handleSelectMode = async (newMode: MidpointMode) => {
@@ -98,6 +149,13 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
       };
     });
 
+    // 실시간 경로 비동기 조회
+    updateRealRoutes(
+      room.participants,
+      { lat: resolved.center_lat, lng: resolved.center_lng },
+      newMode
+    );
+
     // 2. 비동기로 4대 추천 장소(지하철역, 랜드마크, 카페, 음식점) 검색 및 장소 보강
     try {
       const modeResult = await computeFullMidpointResult(room.participants, undefined, newMode);
@@ -127,6 +185,12 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             ),
           };
         });
+
+        updateRealRoutes(
+          room.participants,
+          { lat: modeResult.center_lat, lng: modeResult.center_lng },
+          newMode
+        );
       }
     } catch (e) {
       console.error('중간지점 모드 재계산 오류:', e);
@@ -181,11 +245,22 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             currentMode
           ),
         };
+
+        if (processedData.midpoint_result) {
+          updateRealRoutes(
+            processedData.participants,
+            {
+              lat: processedData.midpoint_result.center_lat,
+              lng: processedData.midpoint_result.center_lng,
+            },
+            currentMode
+          );
+        }
       }
 
       setRoom((prev) => {
         if (!prev) return processedData;
-        // 데이터 동일성 비교: 참가자 수, ID, 이름, 좌표 및 중간지점 중심 좌표가 같으면 이전 객체 참조 유지
+        // 데이터 동일성 비교: 참가자 수, ID, 이름, 좌표 및 거리/시간, 중간지점 중심 좌표가 같으면 이전 객체 참조 유지
         const isSameParticipants =
           prev.participants.length === processedData.participants.length &&
           prev.participants.every((p, idx) => {
@@ -196,7 +271,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
               p.lng === np.lng &&
               p.name === np.name &&
               p.is_host === np.is_host &&
-              p.distance_meters === np.distance_meters
+              p.distance_meters === np.distance_meters &&
+              p.duration_minutes === np.duration_minutes
             );
           });
 
@@ -219,7 +295,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
     } finally {
       setIsLoading(false);
     }
-  }, [roomId, myParticipantId, onNavigateHome]);
+  }, [roomId, myParticipantId, onNavigateHome, updateRealRoutes]);
 
   useEffect(() => {
     fetchRoomData();
@@ -427,13 +503,37 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   </div>
                 </div>
 
-                {/* 우측 거리 및 액션 버튼 */}
+                {/* 우측 거리, 소요시간 및 액션 버튼 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   {p.distance_meters ? (
-                    <span style={{ fontSize: 11, color: 'var(--accent-cyan)', fontWeight: 600, marginRight: 2 }}>
-                      {Math.round(p.distance_meters / 100) / 10}km
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 2 }}>
+                      <span style={{ fontSize: 12, color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                        {Math.round(p.distance_meters / 100) / 10}km
+                      </span>
+                      {p.duration_minutes ? (
+                        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                          약 {p.duration_minutes}분
+                        </span>
+                      ) : null}
+                    </div>
                   ) : null}
+
+                  {/* 카카오맵 공식 길찾기 바로가기 버튼 */}
+                  <button
+                    onClick={() => handleOpenKakaoNavi(p)}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      padding: '5px 8px',
+                      fontSize: 11,
+                      gap: 3,
+                      background: 'rgba(250, 204, 21, 0.12)',
+                      borderColor: 'rgba(250, 204, 21, 0.35)',
+                      color: '#fde047',
+                    }}
+                    title={`${p.name}의 카카오맵 길찾기 열기`}
+                  >
+                    <ExternalLink size={12} /> 길찾기
+                  </button>
 
                   {/* 본인인 경우: 수정 및 나가기 버튼 */}
                   {isMe ? (
