@@ -69,7 +69,7 @@ export async function createRoom(
     title: title || '즐거운 모임',
     status: 'gathering',
     created_at: Date.now(),
-    expires_at: Date.now() + 3 * 24 * 60 * 60 * 1000,
+    expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000,
     participants: [initialHost],
     midpoint_result: null,
     has_host_pin: Boolean(cleanPin),
