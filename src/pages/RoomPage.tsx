@@ -183,7 +183,34 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
         };
       }
 
-      setRoom(processedData);
+      setRoom((prev) => {
+        if (!prev) return processedData;
+        // 데이터 동일성 비교: 참가자 수, ID, 이름, 좌표 및 중간지점 중심 좌표가 같으면 이전 객체 참조 유지
+        const isSameParticipants =
+          prev.participants.length === processedData.participants.length &&
+          prev.participants.every((p, idx) => {
+            const np = processedData.participants[idx];
+            return (
+              p.id === np.id &&
+              p.lat === np.lat &&
+              p.lng === np.lng &&
+              p.name === np.name &&
+              p.is_host === np.is_host &&
+              p.distance_meters === np.distance_meters
+            );
+          });
+
+        const isSameMidpoint =
+          prev.midpoint_result?.center_lat === processedData.midpoint_result?.center_lat &&
+          prev.midpoint_result?.center_lng === processedData.midpoint_result?.center_lng &&
+          prev.midpoint_result?.center_name === processedData.midpoint_result?.center_name &&
+          (prev.midpoint_result?.subways?.length || 0) === (processedData.midpoint_result?.subways?.length || 0);
+
+        if (isSameParticipants && isSameMidpoint) {
+          return prev; // 이전 상태 참조 반환 -> 지도 및 UI 리렌더링 차단
+        }
+        return processedData;
+      });
     } catch (err: any) {
       if (err?.message?.includes('만료') || err?.message?.includes('종료')) {
         alert(err.message);

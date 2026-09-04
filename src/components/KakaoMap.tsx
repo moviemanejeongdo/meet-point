@@ -96,6 +96,14 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
   const animationFrameRef = useRef<number | null>(null);
   const [loadStatus, setLoadStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
+  // 사용자의 지도 확대/축소 및 위치를 영구 보존하기 위한 추적 ref
+  const lastRenderKeyRef = useRef<string>('');
+  const hasInitialFittedRef = useRef<boolean>(false);
+  const prevParticipantCountRef = useRef<number>(0);
+  const prevModeRef = useRef<MidpointMode>(mode);
+  const prevSelectedPlaceIdRef = useRef<string | null>(null);
+  const userInteractedRef = useRef<boolean>(false);
+
   // 지도 인스턴스 초기화
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -123,6 +131,14 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
         // 줌 컨트롤러 추가
         const zoomControl = new window.kakao.maps.ZoomControl();
         map.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
+
+        // 사용자가 직접 지도를 드래그하거나 휠 줌을 조작하면 플래그 활성화
+        window.kakao.maps.event.addListener(map, 'dragstart', () => {
+          userInteractedRef.current = true;
+        });
+        window.kakao.maps.event.addListener(map, 'zoom_start', () => {
+          userInteractedRef.current = true;
+        });
 
         mapInstanceRef.current = map;
         setLoadStatus('ready');
@@ -177,6 +193,19 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
   const renderMapMarkers = () => {
     const map = mapInstanceRef.current;
     if (!map || !window.kakao || !window.kakao.maps) return;
+
+    // 0. 렌더링 데이터 변경 여부 검사 (불필요한 마커 재생성 및 3초 폴링 주기 리로드 원천 차단)
+    const currentRenderKey = JSON.stringify({
+      p: participants.map((p) => [p.id, p.lat, p.lng, p.name, p.distance_meters, p.is_host]),
+      m: midpointResult ? [midpointResult.center_lat, midpointResult.center_lng, midpointResult.center_name] : null,
+      mode,
+      sp: selectedPlace ? selectedPlace.id : null,
+    });
+
+    if (currentRenderKey === lastRenderKeyRef.current) {
+      return;
+    }
+    lastRenderKeyRef.current = currentRenderKey;
 
     // 1. 기존 오버레이 및 폴리라인 정리
     overlaysRef.current.forEach((overlay) => {
@@ -474,14 +503,32 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
     map.relayout();
 
     // 지도 중심 및 줌 바운즈 자동 설정
-    if (hasCoords) {
-      if (participants.length === 1 && !midpointResult && !selectedPlace) {
-        // 방장 1명만 있는 초기 상태: setBounds 오류 방지 및 적정 줌 레벨(4)로 중심 포커스
+    // 초기 1회 로딩, 참가자 수 변동, 모드 변경, 장소 선택 시에만 카메라 뷰포트 자동 이동!
+    // 사용자가 지도를 직접 확대(줌인)/축소(줌아웃)/패닝한 경우에는 줌 아웃(풀백)되지 않도록 철저히 보호
+    const isFirstFit = !hasInitialFittedRef.current;
+    const participantCountChanged = prevParticipantCountRef.current !== participants.length;
+    const modeChanged = prevModeRef.current !== mode;
+    const placeChanged = selectedPlace && prevSelectedPlaceIdRef.current !== selectedPlace.id;
+
+    const shouldFitBounds = isFirstFit || participantCountChanged || modeChanged || placeChanged;
+
+    if (hasCoords && shouldFitBounds) {
+      hasInitialFittedRef.current = true;
+      prevParticipantCountRef.current = participants.length;
+      prevModeRef.current = mode;
+      prevSelectedPlaceIdRef.current = selectedPlace?.id || null;
+
+      if (placeChanged && selectedPlace) {
+        // 특정 추천 장소 클릭 시 해당 위치로 부드럽게 중심 이동
+        const placePos = new window.kakao.maps.LatLng(Number(selectedPlace.y), Number(selectedPlace.x));
+        map.panTo(placePos);
+      } else if (participants.length === 1 && !midpointResult && !selectedPlace) {
+        // 방장 1명만 있는 초기 상태: 적정 줌 레벨(4)로 중심 포커스
         const centerPos = new window.kakao.maps.LatLng(participants[0].lat, participants[0].lng);
         map.setCenter(centerPos);
         map.setLevel(4);
       } else {
-        // 2명 이상이거나 중간지점/추천장소가 있을 때: 모든 핀이 다 보이도록 영역 확장
+        // 2명 이상이거나 중간지점이 있을 때: 모든 핀이 다 보이도록 영역 확장
         map.setBounds(bounds, 80, 80, 80, 80);
       }
     }
