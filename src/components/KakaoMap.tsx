@@ -127,6 +127,18 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
         mapInstanceRef.current = map;
         setLoadStatus('ready');
         renderMapMarkers();
+
+        // 컨테이너 크기 변경 감지 (화면 회전, 탭 전환 등)
+        const resizeObserver = new ResizeObserver(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.relayout();
+          }
+        });
+        if (mapContainerRef.current) {
+          resizeObserver.observe(mapContainerRef.current);
+        }
+
+        (window as any)._kakaoMapResizeObserver = resizeObserver;
       });
     };
 
@@ -152,6 +164,9 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
     return () => {
       if (timer) clearInterval(timer);
       if (timeoutTimer) clearTimeout(timeoutTimer);
+      if ((window as any)._kakaoMapResizeObserver) {
+        (window as any)._kakaoMapResizeObserver.disconnect();
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -196,52 +211,67 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
       bounds.extend(position);
       hasCoords = true;
 
-      // 커스텀 HTML 마커 오버레이
+      const isHost = p.is_host === 1;
+      const dotSize = isHost ? 18 : 15;
+      const dotRadius = dotSize / 2;
+
+      // 기준점 (0,0) 제로 컨테이너: 원형 점의 중심을 정확히 위경도 좌표(0,0)에 배치하여
+      // 줌인/줌아웃, 지도 드래그 시에도 밀리지 않고 선 모션의 시작점과 1픽셀 오차 없이 일체화
       const content = document.createElement('div');
       content.className = 'custom-marker participant-marker';
       content.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transform: translate(-50%, -100%);
+        position: relative;
+        width: 0;
+        height: 0;
+        overflow: visible;
         pointer-events: auto;
         cursor: pointer;
       `;
       content.innerHTML = `
         <div style="
+          position: absolute;
+          left: 0;
+          bottom: ${dotRadius + 5}px;
+          transform: translateX(-50%);
+          white-space: nowrap;
           background: #1e293b;
           color: #f8fafc;
           padding: 4px 10px;
           border-radius: 20px;
           font-size: 12px;
           font-weight: 700;
-          border: 2px solid ${p.is_host ? '#f59e0b' : '#3b82f6'};
+          border: 2px solid ${isHost ? '#f59e0b' : '#3b82f6'};
           box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-          white-space: nowrap;
           display: flex;
           align-items: center;
           gap: 4px;
+          z-index: 3;
         ">
-          ${p.is_host ? '👑 ' : ''}${p.name}
+          ${isHost ? '👑 ' : ''}${p.name}
           ${p.distance_meters ? `<span style="color:#94a3b8;font-size:11px;">(${Math.round(p.distance_meters / 100) / 10}km)</span>` : ''}
         </div>
         <div style="
-          width: ${p.is_host ? '16px' : '14px'};
-          height: ${p.is_host ? '16px' : '14px'};
-          background: ${p.is_host ? '#f59e0b' : '#3b82f6'};
+          position: absolute;
+          left: -${dotRadius}px;
+          top: -${dotRadius}px;
+          width: ${dotSize}px;
+          height: ${dotSize}px;
+          background: ${isHost ? '#f59e0b' : '#3b82f6'};
           border-radius: 50%;
-          margin-top: 3px;
           border: 2px solid #ffffff;
-          box-shadow: ${p.is_host ? '0 0 0 4px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0,0,0,0.5)' : '0 2px 6px rgba(0,0,0,0.5)'};
-          ${p.is_host ? 'animation: pulseGlowGold 2s infinite;' : ''}
+          box-sizing: border-box;
+          box-shadow: ${isHost ? '0 0 0 4px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0,0,0,0.5)' : '0 2px 6px rgba(0,0,0,0.5)'};
+          ${isHost ? 'animation: pulseGlowGold 2s infinite;' : ''}
+          z-index: 2;
         "></div>
       `;
 
       const overlay = new window.kakao.maps.CustomOverlay({
         position,
         content,
-        yAnchor: 1,
-        zIndex: 10 + index,
+        xAnchor: 0,
+        yAnchor: 0,
+        zIndex: 20 + index,
       });
 
       overlay.setMap(map);
@@ -256,47 +286,61 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
 
       const motionConfig = MODE_MOTION_CONFIGS[mode] || MODE_MOTION_CONFIGS.transit;
 
+      // 기준점 (0,0) 제로 컨테이너: 도착 동그라미 중심을 정확히 중심점 위경도(0,0)에 배치하여
+      // 줌인/줌아웃 시에도 목표역에 고정되고 모든 선 모션이 동그라미 중심 속으로 완벽히 수렴
       const midContent = document.createElement('div');
+      midContent.className = 'custom-marker midpoint-marker';
       midContent.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transform: translate(-50%, -100%);
+        position: relative;
+        width: 0;
+        height: 0;
+        overflow: visible;
+        pointer-events: auto;
         z-index: 50;
       `;
       midContent.innerHTML = `
         <div style="
+          position: absolute;
+          left: 0;
+          bottom: 18px;
+          transform: translateX(-50%);
+          white-space: nowrap;
           background: ${motionConfig.badgeGradient};
           color: #ffffff;
           padding: 6px 14px;
           border-radius: 20px;
           font-size: 13px;
           font-weight: 800;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
           border: 2px solid #ffffff;
-          white-space: nowrap;
           display: flex;
           align-items: center;
           gap: 6px;
+          z-index: 3;
         ">
           ${motionConfig.badgeIcon} ${motionConfig.badgeTitle} · ${midpointResult.center_name}
         </div>
         <div style="
-          width: 22px;
-          height: 22px;
+          position: absolute;
+          left: -12px;
+          top: -12px;
+          width: 24px;
+          height: 24px;
           background: #ffffff;
-          border: 3px solid ${motionConfig.strokeColor(false)};
+          border: 3.5px solid ${motionConfig.strokeColor(false)};
           border-radius: 50%;
-          margin-top: 4px;
-          box-shadow: 0 0 0 6px ${motionConfig.pinGlowColor}, 0 4px 10px rgba(0,0,0,0.5);
+          box-sizing: border-box;
+          box-shadow: 0 0 0 6px ${motionConfig.pinGlowColor}, 0 4px 12px rgba(0,0,0,0.5);
           animation: pulseGlow 2s infinite;
+          z-index: 2;
         "></div>
       `;
 
       const midOverlay = new window.kakao.maps.CustomOverlay({
         position: centerLatLng,
         content: midContent,
-        yAnchor: 1,
+        xAnchor: 0,
+        yAnchor: 0,
         zIndex: 50,
       });
 
@@ -371,16 +415,23 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
       bounds.extend(placePos);
 
       const placeContent = document.createElement('div');
+      placeContent.className = 'custom-marker place-marker';
       placeContent.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transform: translate(-50%, -100%);
+        position: relative;
+        width: 0;
+        height: 0;
+        overflow: visible;
+        pointer-events: auto;
         cursor: pointer;
         z-index: 60;
       `;
       placeContent.innerHTML = `
         <div style="
+          position: absolute;
+          left: 0;
+          bottom: 14px;
+          transform: translateX(-50%);
+          white-space: nowrap;
           background: #ec4899;
           color: white;
           padding: 5px 12px;
@@ -388,24 +439,30 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           font-size: 12px;
           font-weight: 700;
           box-shadow: 0 4px 14px rgba(236, 72, 153, 0.5);
-          white-space: nowrap;
+          z-index: 3;
         ">
           📍 ${selectedPlace.place_name}
         </div>
         <div style="
-          width: 14px;
-          height: 14px;
+          position: absolute;
+          left: -8px;
+          top: -8px;
+          width: 16px;
+          height: 16px;
           background: #ec4899;
           border: 2px solid white;
           border-radius: 50%;
-          margin-top: 2px;
+          box-sizing: border-box;
+          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.4), 0 2px 8px rgba(0,0,0,0.5);
+          z-index: 2;
         "></div>
       `;
 
       const placeOverlay = new window.kakao.maps.CustomOverlay({
         position: placePos,
         content: placeContent,
-        yAnchor: 1,
+        xAnchor: 0,
+        yAnchor: 0,
         zIndex: 60,
       });
 
