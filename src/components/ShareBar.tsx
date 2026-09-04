@@ -20,17 +20,22 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
     }
   }, []);
 
-  const shareUrl = window.location.origin.includes('pages.dev')
-    ? window.location.href
-    : `https://meet-point-aql.pages.dev/room/${room.id}`;
+  // 카카오 디벨로퍼스에 등록된 공식 프로덕션 도메인
+  const CANONICAL_ORIGIN = 'https://meet-point-aql.pages.dev';
+
+  // 카카오톡 공유용: 공식 도메인 고정 + 경로와 쿼리(?room=방ID)를 이중 전달하여 인앱 브라우저의 경로 유실 완벽 차단
+  const kakaoShareUrl = `${CANONICAL_ORIGIN}/room/${room.id}?room=${room.id}`;
+
+  // 링크 복사용 깔끔한 공식 URL
+  const copyRoomUrl = `${CANONICAL_ORIGIN}/room/${room.id}`;
 
   const handleCopyLink = async () => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(copyRoomUrl);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = shareUrl;
+        textarea.value = copyRoomUrl;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');
@@ -58,19 +63,19 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
         objectType: 'feed',
         content: {
           title: `[얼중간 초대] ${room.title}`,
-          description: `어디서 볼까? 얼추 중간에서 보자! 내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
-          imageUrl: 'https://meet-point-aql.pages.dev/app-icon.png',
+          description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${copyRoomUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+          imageUrl: `${CANONICAL_ORIGIN}/app-icon.png`,
           link: {
-            mobileWebUrl: shareUrl,
-            webUrl: shareUrl,
+            mobileWebUrl: kakaoShareUrl,
+            webUrl: kakaoShareUrl,
           },
         },
         buttons: [
           {
             title: '얼중간 모임 참여하기',
             link: {
-              mobileWebUrl: shareUrl,
-              webUrl: shareUrl,
+              mobileWebUrl: kakaoShareUrl,
+              webUrl: kakaoShareUrl,
             },
           },
         ],
