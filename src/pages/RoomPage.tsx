@@ -735,103 +735,108 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
               onSelectPlace={(place) => setSelectedPlace(place)}
             />
 
-            {/* 2. 지도 하단 컴팩트 구글 애드센스 광고 (사용자 방해 최소화 슬림 플로팅) */}
+            {/* 지도 하단 플로팅 영역: 카드(위) + 컴팩트 구글 애드센스 광고(아래) */}
             <div
               style={{
                 position: 'absolute',
-                bottom: isMobile ? (room.midpoint_result ? '86px' : '150px') : '16px',
+                bottom: 12,
                 left: '50%',
                 transform: 'translateX(-50%)',
                 width: isMobile ? 'calc(100% - 24px)' : 'min(440px, 90%)',
                 maxWidth: 440,
-                height: 56,
-                maxHeight: 56,
-                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
                 zIndex: 25,
-                pointerEvents: 'auto',
+                pointerEvents: 'none',
               }}
             >
-              <GoogleAd variant="compact" allowClose={true} slot={import.meta.env.VITE_ADSENSE_SLOT_MAP} />
+              {/* 1. 모바일 지도 하단 미니 요약 카드 (중간지점 계산 완료 시) */}
+              {isMobile && room.midpoint_result && (
+                <div
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: 'rgba(15, 23, 42, 0.94)',
+                    backdropFilter: 'blur(16px)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <MapPin size={12} /> 최적 중간 장소
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {room.midpoint_result.center_name}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setMobileTab('info')}
+                    className="btn btn-primary btn-sm"
+                    style={{ flexShrink: 0, padding: '7px 12px', fontSize: 12 }}
+                  >
+                    상세 보기
+                  </button>
+                </div>
+              )}
+
+              {/* 2. 모바일 지도 하단 1인 상태 대기 플로팅 카드 (방장 출발 위치 등록 완료) */}
+              {isMobile && !room.midpoint_result && (
+                <div
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    background: 'rgba(15, 23, 42, 0.94)',
+                    backdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>👑</span> 방장 출발 위치 등록 완료
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>현재 1명 참여 중</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
+                    친구가 1명 이상 링크로 참여하면 실시간으로 가장 공평한 중간 장소와 주변 추천 핫플이 자동 계산됩니다!
+                  </div>
+                  <button
+                    onClick={() => setMobileTab('info')}
+                    className="btn btn-kakao btn-sm"
+                    style={{ width: '100%', padding: '9px 0', fontSize: 13, gap: 5 }}
+                  >
+                    <MessageCircle size={15} /> 친구 초대하기 (카톡 공유)
+                  </button>
+                </div>
+              )}
+
+              {/* 3. 지도 하단 컴팩트 구글 애드센스 광고 (맨 아래 배치) */}
+              <div
+                style={{
+                  width: '100%',
+                  height: 56,
+                  maxHeight: 56,
+                  overflow: 'hidden',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <GoogleAd variant="compact" allowClose={true} slot={import.meta.env.VITE_ADSENSE_SLOT_MAP} />
+              </div>
             </div>
-
-            {/* 모바일 지도 하단 플로팅 미니 요약 카드 */}
-            {isMobile && room.midpoint_result && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 16,
-                  left: 12,
-                  right: 12,
-                  padding: '12px 14px',
-                  background: 'rgba(15, 23, 42, 0.92)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  zIndex: 20,
-                  gap: 8,
-                }}
-              >
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <MapPin size={12} /> 최적 중간 장소
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {room.midpoint_result.center_name}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setMobileTab('info')}
-                  className="btn btn-primary btn-sm"
-                  style={{ flexShrink: 0, padding: '7px 12px', fontSize: 12 }}
-                >
-                  상세 보기
-                </button>
-              </div>
-            )}
-
-            {/* 모바일 지도 하단 1인 상태 대기 플로팅 카드 */}
-            {isMobile && !room.midpoint_result && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 16,
-                  left: 12,
-                  right: 12,
-                  padding: '14px 16px',
-                  background: 'rgba(15, 23, 42, 0.94)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(245, 158, 11, 0.35)',
-                  borderRadius: 'var(--radius-md)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
-                  zIndex: 20,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>👑</span> 방장 출발 위치 등록 완료
-                  </div>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>현재 1명 참여 중</span>
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
-                  친구가 1명 이상 링크로 참여하면 실시간으로 가장 공평한 중간 장소와 주변 추천 핫플이 자동 계산됩니다!
-                </div>
-                <button
-                  onClick={() => setMobileTab('info')}
-                  className="btn btn-kakao btn-sm"
-                  style={{ width: '100%', padding: '9px 0', fontSize: 13, gap: 5 }}
-                >
-                  <MessageCircle size={15} /> 친구 초대하기 (카톡 공유)
-                </button>
-              </div>
-            )}
           </main>
         )}
       </div>
