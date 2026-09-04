@@ -1,5 +1,5 @@
-import { Env } from '../../../../_types';
-import { computeMidpointResultServer } from '../../../../_calc';
+import { Env } from '../../../_types';
+import { computeMidpointResultServer } from '../../../_calc';
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {

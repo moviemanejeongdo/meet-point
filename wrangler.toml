@@ -5,7 +5,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "meetpoint-db"
-database_id = "local-meetpoint-db"
+database_id = "8eadba47-1383-453e-9a80-eb2116d1194d"
 
 [vars]
 KAKAO_REST_API_KEY = "dfaa3019f689dd580f6c8c5b561d61bb"
