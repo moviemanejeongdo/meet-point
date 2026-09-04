@@ -28,7 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
     try {
       setIsLoading(true);
       const res = await createRoom(
-        title.trim() || '친구 모임 중간장소 찾기',
+        title.trim() || '얼중간 모임',
         hostName.trim(),
         hostLocation.lat,
         hostLocation.lng,
@@ -50,33 +50,51 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px 16px',
+        padding: '40px 16px',
       }}
     >
-      {/* 히어로 헤더 */}
-      <div style={{ textAlign: 'center', maxWidth: 540, marginBottom: 32 }}>
+      {/* 얼중간 공식 앱 아이콘 및 히어로 헤더 */}
+      <div style={{ textAlign: 'center', maxWidth: 540, marginBottom: 28 }}>
+        <div style={{ display: 'inline-block', position: 'relative', marginBottom: 16 }}>
+          <img
+            src="/app-icon.png"
+            alt="얼중간 앱 아이콘"
+            style={{
+              width: 84,
+              height: 84,
+              borderRadius: 22,
+              boxShadow: '0 8px 30px rgba(99, 102, 241, 0.45)',
+              border: '2px solid rgba(255, 255, 255, 0.15)',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </div>
+
         <div
           className="badge badge-primary"
           style={{ marginBottom: 14, padding: '6px 14px', fontSize: 13 }}
         >
           <Sparkles size={14} />
-          친구 모임 약속 플랫폼
+          친구 모임 중간장소 찾기 · 얼중간
         </div>
+
         <h1
           style={{
-            fontSize: 'clamp(28px, 6vw, 38px)',
+            fontSize: 'clamp(28px, 6vw, 40px)',
             fontWeight: 900,
             lineHeight: 1.25,
-            marginBottom: 12,
-            background: 'linear-gradient(135deg, #ffffff 30%, #94a3b8 100%)',
+            marginBottom: 14,
+            background: 'linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
         >
-          모두에게 공평한<br />중간 만남 장소를 찾아요
+          어디서 볼까?<br />얼추 중간에서 보자, 얼중간!
         </h1>
-        <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          링크 하나로 친구들의 출발 위치를 모으고, 이동 시간과 거리가 가장 균등한 최적의 만남 장소와 맛집을 추천해 드립니다.
+
+        <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.65, padding: '0 8px' }}>
+          친구들 출발 위치만 쏙쏙 모으면, 누구 하나 억울하지 않게 이동 시간과 거리가 가장 공평한 최적의 중간 장소와 주변 맛집을 딱 정해드립니다.
         </p>
       </div>
 
@@ -92,7 +110,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <Compass size={20} color="var(--primary)" />
           <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>
-            새로운 모임 방 만들기
+            새로운 얼중간 모임 방 만들기
           </h2>
         </div>
 
@@ -104,7 +122,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
             <input
               type="text"
               className="input-field"
-              placeholder="예: 이번 주말 동창회, 프로젝트 회의"
+              placeholder="예: 이번 주말 동창회, 번개 모임"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={24}
@@ -169,7 +187,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
               opacity: !hostName.trim() || !hostLocation ? 0.6 : 1,
             }}
           >
-            {isLoading ? '방 개설 중...' : '모임 방 개설하기'}
+            {isLoading ? '얼중간 방 만드는 중...' : '얼중간 모임 방 만들기'}
             <ArrowRight size={18} />
           </button>
         </form>
@@ -181,24 +199,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
         />
       </div>
 
-      {/* 특징 소개 아이콘 뱃지 */}
+      {/* 하단 특징 안내 뱃지 */}
       <div
         style={{
           display: 'flex',
-          gap: 16,
+          gap: 18,
           marginTop: 28,
           flexWrap: 'wrap',
           justifyContent: 'center',
         }}
       >
         <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Users size={14} color="var(--primary)" /> 비로그인 링크 공유
+          <Users size={14} color="var(--primary)" /> 비로그인 링크 초대
         </span>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Sparkles size={14} color="var(--accent-cyan)" /> 실시간 중간지점 자동 계산
         </span>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Compass size={14} color="var(--accent-gold)" /> 주변 카페·맛집 추천
+          <Compass size={14} color="var(--accent-gold)" /> 주변 핫플·카페 추천
         </span>
       </div>
     </div>

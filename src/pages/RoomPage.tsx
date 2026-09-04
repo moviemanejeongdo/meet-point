@@ -126,7 +126,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
           >
             <ChevronLeft size={16} /> 홈
           </button>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <img src="/app-icon.png" alt="얼중간" style={{ width: 24, height: 24, borderRadius: 6 }} />
             <div style={{ fontSize: 16, fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: 6 }}>
               {room.title}
               <span className="badge badge-primary" style={{ fontSize: 11, padding: '2px 8px' }}>

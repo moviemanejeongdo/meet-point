@@ -56,18 +56,23 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
       >
         {/* 상단 모임 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <img
+            src="/app-icon.png"
+            alt="얼중간"
+            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 12px auto', display: 'block', boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
+          />
           <div
             className="badge badge-primary"
-            style={{ marginBottom: 12, padding: '6px 14px', fontSize: 13 }}
+            style={{ marginBottom: 10, padding: '5px 12px', fontSize: 12 }}
           >
-            <Sparkles size={14} />
-            모임 초대장
+            <Sparkles size={13} />
+            얼중간 모임 초대장
           </div>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: '#ffffff', marginBottom: 6 }}>
             {room.title}
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-            친구들이 모여 중간 만남 장소를 정하고 있어요!
+            친구들이 모여 얼추 중간 만남 장소를 정하고 있어요!
           </p>
         </div>
 

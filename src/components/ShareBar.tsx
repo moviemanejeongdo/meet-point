@@ -55,9 +55,9 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-          title: `[모임 초대] ${room.title}`,
-          description: `친구들이 중간 장소를 찾고 있어요! 내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
-          imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80',
+          title: `[얼중간 초대] ${room.title}`,
+          description: `어디서 볼까? 얼추 중간에서 보자! 내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+          imageUrl: 'https://meet-point-aql.pages.dev/app-icon.png',
           link: {
             mobileWebUrl: shareUrl,
             webUrl: shareUrl,
@@ -65,7 +65,7 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
         },
         buttons: [
           {
-            title: '중간장소 참여하기',
+            title: '얼중간 모임 참여하기',
             link: {
               mobileWebUrl: shareUrl,
               webUrl: shareUrl,
