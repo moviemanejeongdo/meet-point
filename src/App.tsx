@@ -4,8 +4,6 @@ import { RoomPage } from './pages/RoomPage';
 
 function parseRoomIdFromLocation(): string | null {
   try {
-    const rawHref = decodeURIComponent(window.location.href);
-
     // 1. Pathname 검사: /room/:roomId
     const path = decodeURIComponent(window.location.pathname);
     const match = path.match(/\/room\/([a-zA-Z0-9_-]+)/);
@@ -17,7 +15,7 @@ function parseRoomIdFromLocation(): string | null {
     const searchParams = new URLSearchParams(window.location.search);
     const queryRoom = searchParams.get('room') || searchParams.get('roomId');
     if (queryRoom) {
-      return queryRoom;
+      return queryRoom.trim();
     }
 
     // 3. Hash 검사: #/room/:roomId 또는 #room=:roomId
@@ -25,12 +23,6 @@ function parseRoomIdFromLocation(): string | null {
     const hashMatch = hash.match(/#\/?room\/([a-zA-Z0-9_-]+)/);
     if (hashMatch && hashMatch[1]) {
       return hashMatch[1];
-    }
-
-    // 4. 전역 만능 추출: URL 전체(리다이렉트 쿼리, 인코딩 문자열 등) 어디에서든 meet-[ID] 패턴 발견 시 무조건 방 ID 추출
-    const universalMatch = rawHref.match(/(meet-[a-zA-Z0-9_-]+)/);
-    if (universalMatch && universalMatch[1]) {
-      return universalMatch[1];
     }
   } catch (e) {
     console.warn('parseRoomId error:', e);

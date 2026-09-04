@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Users, MapPin, User, UserCheck, LogOut, Trash2, Map, List, Edit3, MessageCircle, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Users, MapPin, User, UserCheck, LogOut, Trash2, Map, List, Edit3, MessageCircle, ExternalLink, Copy, Check } from 'lucide-react';
 import type { Room, PlaceItem, Participant } from '../types';
 import {
   getRoom,
@@ -40,6 +40,91 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   const [midpointMode, setMidpointMode] = useState<MidpointMode>('transit');
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth <= 768);
   const [myParticipantId, setMyParticipantId] = useState<string | null>(() => getStoredParticipantId(roomId));
+  const [isCopiedDirect, setIsCopiedDirect] = useState(false);
+
+  // 직통 공유용 표준 URL (?room=...)
+  const directShareUrl = `https://meet-point-aql.pages.dev/?room=${roomId}`;
+
+  // 지도 플로팅 카드에서 1초 만에 바로 링크 복사
+  const handleCopyLinkDirect = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(directShareUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = directShareUrl;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setIsCopiedDirect(true);
+      setTimeout(() => setIsCopiedDirect(false), 2000);
+    } catch (e) {
+      alert('링크 복사에 실패했습니다.');
+    }
+  };
+
+  // 지도 플로팅 카드에서 1초 만에 바로 카카오톡 공유
+  const handleKakaoShareDirect = async () => {
+    if (!window.Kakao) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `[얼중간 초대] ${room?.title || '모임 장소 정하기'}`,
+            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${directShareUrl}\n출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+            url: directShareUrl,
+          });
+          return;
+        } catch (e) {}
+      }
+      handleCopyLinkDirect();
+      return;
+    }
+
+    try {
+      if (!window.Kakao.isInitialized()) {
+        window.Kakao.init('7c8a87e9d7ca95898413f370d2e52614');
+      }
+
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `[얼중간 초대] ${room?.title || '모임 장소 정하기'}`,
+          description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${directShareUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
+          imageUrl: 'https://meet-point-aql.pages.dev/app-icon.png',
+          imageWidth: 800,
+          imageHeight: 420,
+          link: {
+            mobileWebUrl: directShareUrl,
+            webUrl: directShareUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '얼중간 모임 참여하기',
+            link: {
+              mobileWebUrl: directShareUrl,
+              webUrl: directShareUrl,
+            },
+          },
+        ],
+      });
+    } catch (err) {
+      console.error('Kakao share error:', err);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `[얼중간 초대] ${room?.title || '모임 장소 정하기'}`,
+            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${directShareUrl}`,
+            url: directShareUrl,
+          });
+          return;
+        } catch (e) {}
+      }
+      handleCopyLinkDirect();
+    }
+  };
 
   // 모바일 화면 크기 감지
   useEffect(() => {
@@ -814,13 +899,26 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
                     친구가 1명 이상 링크로 참여하면 실시간으로 가장 공평한 중간 장소와 주변 추천 핫플이 자동 계산됩니다!
                   </div>
-                  <button
-                    onClick={() => setMobileTab('info')}
-                    className="btn btn-kakao btn-sm"
-                    style={{ width: '100%', padding: '9px 0', fontSize: 13, gap: 5 }}
-                  >
-                    <MessageCircle size={15} /> 친구 초대하기 (카톡 공유)
-                  </button>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 2 }}>
+                    <button
+                      onClick={handleKakaoShareDirect}
+                      className="btn btn-kakao btn-sm"
+                      style={{ width: '100%', padding: '10px 0', fontSize: 13, gap: 5, whiteSpace: 'nowrap' }}
+                      title="카카오톡으로 모임 초대하기"
+                    >
+                      <MessageCircle size={15} /> 카톡 공유
+                    </button>
+
+                    <button
+                      onClick={handleCopyLinkDirect}
+                      className="btn btn-secondary btn-sm"
+                      style={{ width: '100%', padding: '10px 0', fontSize: 13, gap: 5, whiteSpace: 'nowrap' }}
+                      title="모임 초대 링크 복사"
+                    >
+                      {isCopiedDirect ? <Check size={15} color="var(--accent-green)" /> : <Copy size={15} />}
+                      {isCopiedDirect ? '복사 완료!' : '링크 복사'}
+                    </button>
+                  </div>
                 </div>
               )}
 
