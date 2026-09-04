@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, MapPin, ArrowRight, Compass, Users } from 'lucide-react';
 import { createRoom } from '../api/client';
 import { LocationSearchModal } from '../components/LocationSearchModal';
+import { GoogleAd } from '../components/GoogleAd';
 
 interface HomePageProps {
   onNavigateToRoom: (roomId: string) => void;
@@ -245,6 +246,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
         <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Compass size={14} color="var(--accent-gold)" /> 주변 핫플·카페 추천
         </span>
+      </div>
+
+      {/* 1. 처음 방개설 랜딩 페이지 하단 구글 애드센스 광고 */}
+      <div style={{ width: '100%', maxWidth: 440, marginTop: 24 }}>
+        <GoogleAd variant="card" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} />
       </div>
     </div>
   );

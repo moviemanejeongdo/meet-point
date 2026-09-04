@@ -146,8 +146,16 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
 
         // 컨테이너 크기 변경 감지 (화면 회전, 탭 전환 등)
         const resizeObserver = new ResizeObserver(() => {
-          if (mapInstanceRef.current) {
-            mapInstanceRef.current.relayout();
+          if (mapInstanceRef.current && mapContainerRef.current) {
+            const w = mapContainerRef.current.offsetWidth;
+            const h = mapContainerRef.current.offsetHeight;
+            if (w > 0 && h > 0) {
+              mapInstanceRef.current.relayout();
+              if (!hasInitialFittedRef.current) {
+                lastRenderKeyRef.current = '';
+                renderMapMarkers();
+              }
+            }
           }
         });
         if (mapContainerRef.current) {
@@ -193,6 +201,9 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
   const renderMapMarkers = () => {
     const map = mapInstanceRef.current;
     if (!map || !window.kakao || !window.kakao.maps) return;
+    if (mapContainerRef.current && (mapContainerRef.current.offsetWidth === 0 || mapContainerRef.current.offsetHeight === 0)) {
+      return;
+    }
 
     // 0. 렌더링 데이터 변경 여부 검사 (불필요한 마커 재생성 및 3초 폴링 주기 리로드 원천 차단)
     const currentRenderKey = JSON.stringify({

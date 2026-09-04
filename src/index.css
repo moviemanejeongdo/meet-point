@@ -36,11 +36,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  min-height: 100vh;
   overflow-x: hidden;
   letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;

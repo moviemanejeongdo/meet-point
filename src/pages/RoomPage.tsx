@@ -23,6 +23,7 @@ import {
 } from '../utils/midpoint';
 import { ParticipantOnboarding } from '../components/ParticipantOnboarding';
 import { EditProfileModal } from '../components/EditProfileModal';
+import { GoogleAd } from '../components/GoogleAd';
 import type { MidpointMode } from '../types';
 
 interface RoomPageProps {
@@ -449,6 +450,9 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
         }}
       />
 
+      {/* 모임정보 추천장소와 참여자 목록 사이 구글 애드센스 광고 */}
+      <GoogleAd variant="card" slot={import.meta.env.VITE_ADSENSE_SLOT_SIDEBAR} />
+
       {/* 3. 참여자 관리 상세 목록 */}
       <div className="glass-panel" style={{ padding: '16px' }}>
         <div
@@ -659,6 +663,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
           flexDirection: 'row',
           position: 'relative',
           overflow: 'hidden',
+          minHeight: 0,
+          height: 'calc(100vh - 53px)',
         }}
       >
         {/* 데스크톱 사이드바 또는 모바일 정보 탭 */}
@@ -681,7 +687,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
 
         {/* 지도 영역 (데스크톱에서는 상시 표시, 모바일에서는 map 탭일 때 표시) */}
         {(!isMobile || mobileTab === 'map') && (
-          <main style={{ flex: 1, position: 'relative', height: '100%', width: '100%' }}>
+          <main style={{ flex: 1, position: 'relative', height: '100%', width: '100%', minHeight: 0 }}>
             {/* 모바일 지도 화면 상단 플로팅 기준 변경 선택기 */}
             {isMobile && room.participants.length >= 2 && (
               <div
@@ -707,6 +713,22 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
               selectedPlace={selectedPlace}
               onSelectPlace={(place) => setSelectedPlace(place)}
             />
+
+            {/* 2. 지도 하단 컴팩트 구글 애드센스 광고 (사용자 방해 최소화 슬림 플로팅) */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: isMobile ? (room.midpoint_result ? '86px' : '150px') : '16px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: isMobile ? 'calc(100% - 24px)' : 'min(440px, 90%)',
+                maxWidth: 440,
+                zIndex: 25,
+                pointerEvents: 'auto',
+              }}
+            >
+              <GoogleAd variant="compact" allowClose={true} slot={import.meta.env.VITE_ADSENSE_SLOT_MAP} />
+            </div>
 
             {/* 모바일 지도 하단 플로팅 미니 요약 카드 */}
             {isMobile && room.midpoint_result && (
