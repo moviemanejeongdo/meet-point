@@ -77,7 +77,7 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
         content: {
           title: `[얼중간 초대] ${room.title}`,
           description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${kakaoShareUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
-          imageUrl: `${CANONICAL_ORIGIN}/app-icon.png`,
+          imageUrl: `${CANONICAL_ORIGIN}/og-image.png`,
           imageWidth: 800,
           imageHeight: 420,
           link: {

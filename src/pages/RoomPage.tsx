@@ -92,7 +92,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
         content: {
           title: `[얼중간 초대] ${room?.title || '모임 장소 정하기'}`,
           description: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${directShareUrl}\n내 출발 위치를 등록하고 공평한 중간지점을 확인해 보세요.`,
-          imageUrl: 'https://meet-point-aql.pages.dev/app-icon.png',
+          imageUrl: 'https://meet-point-aql.pages.dev/og-image.png',
           imageWidth: 800,
           imageHeight: 420,
           link: {
