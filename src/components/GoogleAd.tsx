@@ -181,20 +181,21 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
         )}
 
         {/* 실제 구글 애드센스 ins 태그 */}
-        <div style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: '100%', height: '50px', maxHeight: '50px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <ins
             ref={adRef}
             className="adsbygoogle"
             style={{
-              display: 'inline-block',
+              display: 'block',
               width: '100%',
               height: '50px',
               maxHeight: '50px',
+              overflow: 'hidden',
             }}
             data-ad-client={client}
             data-ad-slot={slot}
-            data-ad-format={format}
-            data-full-width-responsive={responsive ? 'true' : 'false'}
+            data-ad-format="horizontal"
+            data-full-width-responsive="false"
           />
         </div>
       </div>

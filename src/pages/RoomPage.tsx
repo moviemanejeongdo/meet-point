@@ -723,6 +723,9 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                 transform: 'translateX(-50%)',
                 width: isMobile ? 'calc(100% - 24px)' : 'min(440px, 90%)',
                 maxWidth: 440,
+                height: 56,
+                maxHeight: 56,
+                overflow: 'hidden',
                 zIndex: 25,
                 pointerEvents: 'auto',
               }}

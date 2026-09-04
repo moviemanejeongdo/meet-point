@@ -23,16 +23,17 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
   // 카카오 디벨로퍼스에 등록된 공식 프로덕션 도메인
   const CANONICAL_ORIGIN = 'https://meet-point-aql.pages.dev';
 
-  // 링크 복사용 깔끔한 공식 URL
-  const copyRoomUrl = `${CANONICAL_ORIGIN}/room/${room.id}`;
+  // 카카오톡 인앱 브라우저의 서브 경로 유실을 100% 원천 차단하는 표준 초대 링크 (?room=...)
+  // 접속 시 App.tsx에서 방을 즉시 로드하고 주소창을 깔끔한 /room/:roomId로 자동 정규화합니다.
+  const shareRoomUrl = `${CANONICAL_ORIGIN}/?room=${room.id}`;
 
   const handleCopyLink = async () => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(copyRoomUrl);
+        await navigator.clipboard.writeText(shareRoomUrl);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = copyRoomUrl;
+        textarea.value = shareRoomUrl;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');
@@ -46,8 +47,8 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
   };
 
   const handleKakaoShare = async () => {
-    // 카카오 서버의 도메인 화이트리스트 검증을 100% 통과하는 순수 정규 URL
-    const kakaoShareUrl = `${CANONICAL_ORIGIN}/room/${room.id}`;
+    // 카카오 서버의 도메인 검증 및 웹뷰 경로 유실을 완벽 방지하는 표준 공유 URL
+    const kakaoShareUrl = shareRoomUrl;
 
     if (!window.Kakao) {
       if (navigator.share) {
@@ -100,8 +101,8 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
         try {
           await navigator.share({
             title: `[얼중간 초대] ${room.title}`,
-            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${copyRoomUrl}`,
-            url: copyRoomUrl,
+            text: `어디서 볼까? 얼추 중간에서 보자!\n모임 링크: ${shareRoomUrl}`,
+            url: shareRoomUrl,
           });
           return;
         } catch (e) {
