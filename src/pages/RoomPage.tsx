@@ -8,6 +8,7 @@ import {
   deleteParticipant,
   deleteRoom,
   getStoredParticipantId,
+  setStoredParticipantId,
   removeStoredParticipantId,
 } from '../api/client';
 import { KakaoMap } from '../components/KakaoMap';
@@ -28,8 +29,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<'map' | 'info'>('map');
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth <= 768);
-
-  const myParticipantId = getStoredParticipantId(roomId);
+  const [myParticipantId, setMyParticipantId] = useState<string | null>(() => getStoredParticipantId(roomId));
 
   // 모바일 화면 크기 감지
   useEffect(() => {
@@ -84,10 +84,18 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   ) => {
     try {
       const res = await addParticipant(roomId, name, location.lat, location.lng, location.addressName);
+      setStoredParticipantId(roomId, res.participant_id);
+      setMyParticipantId(res.participant_id);
       setRoom(res.room);
     } catch (err: any) {
       alert(err.message || '참가자 등록에 실패했습니다.');
     }
+  };
+
+  // 온보딩 목록에서 본인 프로필 바로 선택(퀵 로그인) 핸들러
+  const handleSelectParticipant = (pid: string) => {
+    setStoredParticipantId(roomId, pid);
+    setMyParticipantId(pid);
   };
 
   // 내 정보(이름 + 출발지) 수정 핸들러
@@ -176,7 +184,13 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   // 아직 참가자로 등록하지 않은 신규 방문자라면 온보딩 뷰 노출
   const isUserJoined = myParticipantId && room.participants.some((p) => p.id === myParticipantId);
   if (!isUserJoined) {
-    return <ParticipantOnboarding room={room} onSubmit={handleOnboardingSubmit} />;
+    return (
+      <ParticipantOnboarding
+        room={room}
+        onSubmit={handleOnboardingSubmit}
+        onSelectParticipant={handleSelectParticipant}
+      />
+    );
   }
 
   const myParticipant = room.participants.find((p) => p.id === myParticipantId);
@@ -471,7 +485,9 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             lng: myParticipant.lng,
             addressName: myParticipant.address_name,
           }}
+          isHost={isHost}
           onSave={handleUpdateProfile}
+          onLeaveRoom={handleLeaveRoom}
         />
       )}
     </div>

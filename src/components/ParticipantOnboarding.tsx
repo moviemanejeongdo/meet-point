@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Users, MapPin, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Users, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import type { Room } from '../types';
 import { LocationSearchModal } from './LocationSearchModal';
 
 interface ParticipantOnboardingProps {
   room: Room;
   onSubmit: (name: string, location: { lat: number; lng: number; addressName: string }) => Promise<void>;
+  onSelectParticipant?: (participantId: string) => void;
 }
 
-export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ room, onSubmit }) => {
+export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ room, onSubmit, onSelectParticipant }) => {
   const [name, setName] = useState('');
   const [location, setLocation] = useState<{ lat: number; lng: number; addressName: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,9 +117,10 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                   background: 'rgba(15, 23, 42, 0.5)',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border-color)',
+                  gap: 8,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
                   <div
                     style={{
                       width: 28,
@@ -131,20 +133,40 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                       fontSize: 13,
                       fontWeight: 700,
                       color: p.is_host ? '#fbbf24' : '#818cf8',
+                      flexShrink: 0,
                     }}
                   >
                     {p.is_host ? '👑' : p.name.charAt(0)}
                   </div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#f8fafc' }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.name} {p.is_host ? <span style={{ fontSize: 11, color: '#f59e0b' }}>(방장)</span> : null}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       출발: {p.address_name}
                     </div>
                   </div>
                 </div>
-                <CheckCircle2 size={16} color="var(--accent-green)" />
+
+                {/* 내가 이 사람이라면 바로 입장할 수 있는 빠른 선택 버튼 */}
+                {onSelectParticipant && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectParticipant(p.id)}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      padding: '5px 9px',
+                      fontSize: 11,
+                      flexShrink: 0,
+                      gap: 4,
+                      borderColor: 'rgba(59, 130, 246, 0.4)',
+                      color: '#60a5fa',
+                    }}
+                    title="이미 등록된 내 프로필로 바로 입장"
+                  >
+                    내 프로필로 입장
+                  </button>
+                )}
               </div>
             ))}
           </div>
