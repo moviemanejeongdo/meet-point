@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Users, MapPin, ArrowRight, Sparkles } from 'lucide-react';
-import type { Room } from '../types';
+import { Users, MapPin, ArrowRight, Sparkles, Lock, KeyRound, X } from 'lucide-react';
+import type { Room, Participant } from '../types';
 import { LocationSearchModal } from './LocationSearchModal';
+import { verifyHostPin } from '../api/client';
 
 interface ParticipantOnboardingProps {
   room: Room;
@@ -14,6 +15,12 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
   const [location, setLocation] = useState<{ lat: number; lng: number; addressName: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 방장 PIN 검증 모달 상태
+  const [pinTargetHost, setPinTargetHost] = useState<Participant | null>(null);
+  const [inputPin, setInputPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [isVerifyingPin, setIsVerifyingPin] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +40,41 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
       alert(err.message || '참여 등록에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleHostLoginClick = (participant: Participant) => {
+    if (room.has_host_pin === false) {
+      alert('비밀번호가 설정되지 않은 이전 모임입니다. 아래 폼에서 새로운 참가자로 등록해 주세요.');
+      return;
+    }
+    setPinTargetHost(participant);
+    setInputPin('');
+    setPinError('');
+  };
+
+  const handleVerifyPinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pinTargetHost || !onSelectParticipant) return;
+    if (inputPin.length !== 4) {
+      setPinError('비밀번호 4자리를 모두 입력해 주세요.');
+      return;
+    }
+
+    try {
+      setIsVerifyingPin(true);
+      setPinError('');
+      const res = await verifyHostPin(room.id, inputPin);
+      if (res.success) {
+        onSelectParticipant(pinTargetHost.id);
+        setPinTargetHost(null);
+      } else {
+        setPinError(res.error || '비밀번호가 일치하지 않습니다.');
+      }
+    } catch (err: any) {
+      setPinError(err.message || '인증 중 오류가 발생했습니다.');
+    } finally {
+      setIsVerifyingPin(false);
     }
   };
 
@@ -150,22 +192,43 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
 
                 {/* 내가 이 사람이라면 바로 입장할 수 있는 빠른 선택 버튼 */}
                 {onSelectParticipant && (
-                  <button
-                    type="button"
-                    onClick={() => onSelectParticipant(p.id)}
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      padding: '5px 9px',
-                      fontSize: 11,
-                      flexShrink: 0,
-                      gap: 4,
-                      borderColor: 'rgba(59, 130, 246, 0.4)',
-                      color: '#60a5fa',
-                    }}
-                    title="이미 등록된 내 프로필로 바로 입장"
-                  >
-                    내 프로필로 입장
-                  </button>
+                  p.is_host === 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => handleHostLoginClick(p)}
+                      className="btn btn-secondary btn-sm"
+                      style={{
+                        padding: '5px 9px',
+                        fontSize: 11,
+                        flexShrink: 0,
+                        gap: 4,
+                        borderColor: 'rgba(245, 158, 11, 0.4)',
+                        color: '#fbbf24',
+                        background: 'rgba(245, 158, 11, 0.08)',
+                      }}
+                      title="방장 비밀번호 4자리 입력 후 입장"
+                    >
+                      <Lock size={12} />
+                      방장 입장
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onSelectParticipant(p.id)}
+                      className="btn btn-secondary btn-sm"
+                      style={{
+                        padding: '5px 9px',
+                        fontSize: 11,
+                        flexShrink: 0,
+                        gap: 4,
+                        borderColor: 'rgba(59, 130, 246, 0.4)',
+                        color: '#60a5fa',
+                      }}
+                      title="이미 등록된 내 프로필로 바로 입장"
+                    >
+                      내 프로필로 입장
+                    </button>
+                  )
                 )}
               </div>
             ))}
@@ -245,6 +308,109 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
           onClose={() => setIsModalOpen(false)}
           onSelectLocation={(loc) => setLocation(loc)}
         />
+
+        {/* 방장 비밀번호 4자리 입력 모달 */}
+        {pinTargetHost && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+            }}
+          >
+            <div
+              className="apple-card"
+              style={{
+                width: '100%',
+                maxWidth: 360,
+                padding: '24px',
+                animation: 'modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <KeyRound size={18} color="#fbbf24" />
+                  <span style={{ fontSize: 16, fontWeight: 700, color: '#f8fafc' }}>
+                    방장 비밀번호 확인
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPinTargetHost(null)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: 4,
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 16 }}>
+                '{pinTargetHost.name}' 방장 프로필로 입장하려면 방 생성 시 설정한 4자리 비밀번호를 입력해 주세요.
+              </p>
+
+              <form onSubmit={handleVerifyPinSubmit}>
+                <div style={{ marginBottom: 16 }}>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className="input-field"
+                    placeholder="숫자 4자리"
+                    value={inputPin}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                      setInputPin(val);
+                      setPinError('');
+                    }}
+                    maxLength={4}
+                    autoFocus
+                    style={{ textAlign: 'center', letterSpacing: '0.3em', fontSize: 18, fontWeight: 700 }}
+                  />
+                  {pinError && (
+                    <div style={{ color: '#ef4444', fontSize: 12, marginTop: 6, textAlign: 'center' }}>
+                      {pinError}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => setPinTargetHost(null)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ width: '100%', padding: '10px 0' }}
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isVerifyingPin || inputPin.length !== 4}
+                    className="btn btn-primary btn-sm"
+                    style={{
+                      width: '100%',
+                      padding: '10px 0',
+                      opacity: inputPin.length !== 4 ? 0.6 : 1,
+                    }}
+                  >
+                    {isVerifyingPin ? '확인 중...' : '확인'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

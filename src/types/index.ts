@@ -49,6 +49,7 @@ export interface Room {
   created_at: number;
   expires_at: number;
   participants: Participant[];
+  has_host_pin?: boolean; // 방장 4자리 비밀번호 설정 여부
 }
 
 export interface CreateRoomResponse {

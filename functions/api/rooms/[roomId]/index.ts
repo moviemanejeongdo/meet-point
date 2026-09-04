@@ -65,6 +65,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         expires_at: room.expires_at,
         midpoint_result: midpointResult,
         participants: enrichedParticipants,
+        has_host_pin: Boolean(room.host_token && room.host_token.startsWith('pin:')),
       }),
       {
         status: 200,

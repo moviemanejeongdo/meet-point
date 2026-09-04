@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, MapPin, User, Check, Search, LogOut, Trash2 } from 'lucide-react';
+import { X, MapPin, User, UserCheck, Check, Search, LogOut, Trash2 } from 'lucide-react';
 import { LocationSearchModal } from './LocationSearchModal';
 
 interface EditProfileModalProps {
@@ -10,6 +10,7 @@ interface EditProfileModalProps {
   isHost?: boolean;
   onSave: (name: string, location: { lat: number; lng: number; addressName: string }) => Promise<void>;
   onLeaveRoom?: () => void;
+  onSwitchProfile?: () => void;
 }
 
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -20,6 +21,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isHost = false,
   onSave,
   onLeaveRoom,
+  onSwitchProfile,
 }) => {
   const [name, setName] = useState(currentName);
   const [location, setLocation] = useState(currentLocation);
@@ -156,9 +158,35 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             </div>
           </form>
 
-          {/* 하단 2단: 모임 나가기 / 모임 방 삭제 (단독 가로 100% 정렬) */}
+          {/* 하단 2단: 다른 참가자로 전환 / 새로 등록하기 */}
+          {onSwitchProfile && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onSwitchProfile();
+                }}
+                className="btn btn-secondary"
+                style={{
+                  width: '100%',
+                  padding: '11px 0',
+                  color: '#60a5fa',
+                  borderColor: 'rgba(59, 130, 246, 0.4)',
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  gap: 6,
+                  fontSize: 14,
+                }}
+              >
+                <UserCheck size={16} />
+                다른 프로필로 변경 / 새로 등록하기
+              </button>
+            </div>
+          )}
+
+          {/* 하단 3단: 모임 나가기 / 모임 방 삭제 (단독 가로 100% 정렬) */}
           {onLeaveRoom && (
-            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14 }}>
               <button
                 type="button"
                 onClick={handleLeave}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, Users, MapPin, User, LogOut, Trash2, Map, List, Edit3, MessageCircle, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Users, MapPin, User, UserCheck, LogOut, Trash2, Map, List, Edit3, MessageCircle, ExternalLink } from 'lucide-react';
 import type { Room, PlaceItem, Participant } from '../types';
 import {
   getRoom,
@@ -363,6 +363,15 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
     }
   };
 
+  // 내 참가자 프로필 해제(초기화) 후 온보딩(새로 등록/다른 참가자 선택)으로 복귀 핸들러
+  const handleSwitchProfile = () => {
+    if (confirm('현재 연결된 프로필을 해제하고 다른 참가자로 변경하거나 새로 등록하시겠습니까?')) {
+      removeStoredParticipantId(roomId);
+      setMyParticipantId(null);
+      setIsEditProfileModalOpen(false);
+    }
+  };
+
   // 모임 나가기 / 방장의 모임 삭제 핸들러
   const handleLeaveRoom = async () => {
     const currentParticipant = room?.participants.find((p) => p.id === myParticipantId);
@@ -629,14 +638,26 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
           </div>
         </div>
 
-        <button
-          onClick={() => setIsEditProfileModalOpen(true)}
-          className="btn btn-secondary btn-sm"
-          style={{ fontSize: 12, gap: 4, flexShrink: 0, padding: '6px 10px' }}
-        >
-          <User size={13} color="var(--primary)" />
-          내 정보
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <button
+            onClick={handleSwitchProfile}
+            className="btn btn-secondary btn-sm"
+            style={{ fontSize: 12, gap: 4, flexShrink: 0, padding: '6px 9px', color: '#94a3b8' }}
+            title="현재 연결된 프로필을 해제하고 다른 참가자로 변경하거나 새로 등록"
+          >
+            <UserCheck size={13} />
+            프로필 변경
+          </button>
+
+          <button
+            onClick={() => setIsEditProfileModalOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{ fontSize: 12, gap: 4, flexShrink: 0, padding: '6px 10px' }}
+          >
+            <User size={13} color="var(--primary)" />
+            내 정보
+          </button>
+        </div>
       </header>
 
       {/* 2. 모바일 전용 탭 바 (스마트폰 화면에서만 노출) */}
@@ -829,6 +850,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
           isHost={isHost}
           onSave={handleUpdateProfile}
           onLeaveRoom={handleLeaveRoom}
+          onSwitchProfile={handleSwitchProfile}
         />
       )}
     </div>

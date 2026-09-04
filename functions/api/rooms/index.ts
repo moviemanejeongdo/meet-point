@@ -4,7 +4,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const { request, env } = context;
     const body: any = await request.json();
-    const { title, host_name, host_lat, host_lng, host_address } = body;
+    const { title, host_name, host_lat, host_lng, host_address, host_pin } = body;
 
     if (!host_name || host_lat === undefined || host_lng === undefined) {
       return new Response(JSON.stringify({ error: '필수 입력 정보가 누락되었습니다.' }), {
@@ -14,7 +14,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const roomId = 'meet-' + Math.random().toString(36).substring(2, 8);
-    const hostToken = 'token-' + crypto.randomUUID();
+    const cleanPin = host_pin ? String(host_pin).trim() : '';
+    const hostToken = cleanPin ? `pin:${cleanPin}:${crypto.randomUUID()}` : `token-${crypto.randomUUID()}`;
     const hostParticipantId = 'pid-' + crypto.randomUUID();
     const now = Date.now();
     const expiresAt = now + 3 * 24 * 60 * 60 * 1000; // 3일(72시간) 뒤 만료

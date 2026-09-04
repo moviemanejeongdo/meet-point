@@ -11,6 +11,7 @@ interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
   const [title, setTitle] = useState('');
   const [hostName, setHostName] = useState('');
+  const [hostPin, setHostPin] = useState('');
   const [hostLocation, setHostLocation] = useState<{ lat: number; lng: number; addressName: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +20,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
     e.preventDefault();
     if (!hostName.trim()) {
       alert('방장 닉네임을 입력해 주세요.');
+      return;
+    }
+    if (!/^\d{4}$/.test(hostPin.trim())) {
+      alert('방장 비밀번호는 숫자 4자리로 입력해 주세요.');
       return;
     }
     if (!hostLocation) {
@@ -33,7 +38,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
         hostName.trim(),
         hostLocation.lat,
         hostLocation.lng,
-        hostLocation.addressName
+        hostLocation.addressName,
+        hostPin.trim()
       );
       onNavigateToRoom(res.room_id);
     } catch (err: any) {
@@ -168,6 +174,31 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
             />
           </div>
 
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                방장 비밀번호 (숫자 4자리)
+              </label>
+              <span style={{ fontSize: 11, color: 'var(--accent-cyan)' }}>
+                타인의 방장 프로필 도용 방지
+              </span>
+            </div>
+            <input
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className="input-field"
+              placeholder="숫자 4자리 입력 (예: 1234)"
+              value={hostPin}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                setHostPin(val);
+              }}
+              maxLength={4}
+              required
+            />
+          </div>
+
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
               내 출발 위치
@@ -204,13 +235,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
 
           <button
             type="submit"
-            disabled={isLoading || !hostName.trim() || !hostLocation}
+            disabled={isLoading || !hostName.trim() || !hostLocation || hostPin.length !== 4}
             className="btn btn-primary"
             style={{
               width: '100%',
               padding: '14px',
               fontSize: 15,
-              opacity: !hostName.trim() || !hostLocation ? 0.6 : 1,
+              opacity: !hostName.trim() || !hostLocation || hostPin.length !== 4 ? 0.6 : 1,
             }}
           >
             {isLoading ? '얼중간 방 만드는 중...' : '얼중간 모임 방 만들기'}

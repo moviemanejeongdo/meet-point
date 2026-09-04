@@ -14,13 +14,21 @@ export function setStoredParticipantId(roomId: string, participantId: string): v
 }
 
 // 1. 방 생성 API
-export async function createRoom(title: string, hostName: string, hostLat: number, hostLng: number, hostAddress: string): Promise<CreateRoomResponse> {
+export async function createRoom(
+  title: string,
+  hostName: string,
+  hostLat: number,
+  hostLng: number,
+  hostAddress: string,
+  hostPin?: string
+): Promise<CreateRoomResponse> {
   const payload = {
     title,
     host_name: hostName,
     host_lat: hostLat,
     host_lng: hostLng,
     host_address: hostAddress,
+    host_pin: hostPin,
   };
 
   try {
@@ -41,7 +49,8 @@ export async function createRoom(title: string, hostName: string, hostLat: numbe
 
   // Fallback: 로컬 스토리지 시뮬레이션
   const roomId = 'meet-' + Math.random().toString(36).substring(2, 8);
-  const hostToken = 'token-' + Math.random().toString(36).substring(2, 10);
+  const cleanPin = hostPin ? String(hostPin).trim() : '';
+  const hostToken = cleanPin ? `pin:${cleanPin}:${Math.random().toString(36).substring(2, 10)}` : 'token-' + Math.random().toString(36).substring(2, 10);
   const hostPid = 'pid-' + Math.random().toString(36).substring(2, 10);
 
   const initialHost: Participant = {
@@ -63,9 +72,13 @@ export async function createRoom(title: string, hostName: string, hostLat: numbe
     expires_at: Date.now() + 3 * 24 * 60 * 60 * 1000,
     participants: [initialHost],
     midpoint_result: null,
+    has_host_pin: Boolean(cleanPin),
   };
 
   localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}${roomId}`, JSON.stringify(newRoom));
+  if (cleanPin) {
+    localStorage.setItem(`meetpoint_pin_${roomId}`, cleanPin);
+  }
   setStoredParticipantId(roomId, hostPid);
 
   return {
@@ -73,6 +86,33 @@ export async function createRoom(title: string, hostName: string, hostLat: numbe
     host_token: hostToken,
     participant_id: hostPid,
   };
+}
+
+// 방장 비밀번호 4자리 검증 API
+export async function verifyHostPin(roomId: string, pin: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/rooms/${roomId}/verify-pin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      return { success: true };
+    }
+    return { success: false, error: data.error || '비밀번호가 일치하지 않습니다.' };
+  } catch (err) {
+    // 로컬 스토리지 fallback 검증
+    const localPin = localStorage.getItem(`meetpoint_pin_${roomId}`);
+    if (localPin) {
+      if (localPin === pin.trim()) {
+        return { success: true };
+      }
+      return { success: false, error: '비밀번호가 일치하지 않습니다.' };
+    }
+    return { success: false, error: '비밀번호가 설정되지 않은 이전 모임입니다. 신규 참가자로 등록해 주세요.' };
+  }
 }
 
 // 2. 방 정보 및 참가자 목록 조회 API
