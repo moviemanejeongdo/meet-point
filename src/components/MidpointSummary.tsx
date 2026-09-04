@@ -101,35 +101,44 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
         </div>
       </div>
 
-      {/* 2. 추천 장소 카테고리 탭 */}
-      <div style={{ display: 'flex', gap: 6, padding: '4px', background: 'rgba(15, 23, 42, 0.5)', borderRadius: 'var(--radius-sm)' }}>
+      {/* 2. 추천 장소 카테고리 탭 (모바일 4분할 균등 그리드, 줄바꿈 완전 방지) */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 4,
+          padding: '4px',
+          background: 'rgba(15, 23, 42, 0.6)',
+          borderRadius: 'var(--radius-sm)',
+        }}
+      >
         <button
           onClick={() => setActiveTab('subway')}
           className={`btn btn-sm ${activeTab === 'subway' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1, padding: '8px 0' }}
+          style={{ width: '100%', padding: '8px 2px', fontSize: 12, gap: 4, whiteSpace: 'nowrap' }}
         >
-          <Train size={14} /> 지하철역
+          <Train size={13} style={{ flexShrink: 0 }} /> 지하철역
         </button>
         <button
           onClick={() => setActiveTab('landmark')}
           className={`btn btn-sm ${activeTab === 'landmark' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1, padding: '8px 0' }}
+          style={{ width: '100%', padding: '8px 2px', fontSize: 12, gap: 4, whiteSpace: 'nowrap' }}
         >
-          <MapPin size={14} /> 랜드마크
+          <MapPin size={13} style={{ flexShrink: 0 }} /> 랜드마크
         </button>
         <button
           onClick={() => setActiveTab('cafe')}
           className={`btn btn-sm ${activeTab === 'cafe' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1, padding: '8px 0' }}
+          style={{ width: '100%', padding: '8px 2px', fontSize: 12, gap: 4, whiteSpace: 'nowrap' }}
         >
-          <Coffee size={14} /> 카페
+          <Coffee size={13} style={{ flexShrink: 0 }} /> 카페
         </button>
         <button
           onClick={() => setActiveTab('restaurant')}
           className={`btn btn-sm ${activeTab === 'restaurant' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1, padding: '8px 0' }}
+          style={{ width: '100%', padding: '8px 2px', fontSize: 12, gap: 4, whiteSpace: 'nowrap' }}
         >
-          <Utensils size={14} /> 맛집
+          <Utensils size={13} style={{ flexShrink: 0 }} /> 맛집
         </button>
       </div>
 

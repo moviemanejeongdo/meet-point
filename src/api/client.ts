@@ -177,10 +177,11 @@ export async function addParticipant(
   };
 }
 
-// 4. 참가자 위치 수정 API
-export async function updateParticipantLocation(
+// 4. 참가자 정보(이름 및 위치) 수정 API
+export async function updateParticipantProfile(
   roomId: string,
   participantId: string,
+  name: string,
   lat: number,
   lng: number,
   addressName: string
@@ -189,7 +190,7 @@ export async function updateParticipantLocation(
     const res = await fetch(`/api/rooms/${roomId}/participants/${participantId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lat, lng, address_name: addressName }),
+      body: JSON.stringify({ name, lat, lng, address_name: addressName }),
     });
 
     if (res.ok) {
@@ -199,15 +200,72 @@ export async function updateParticipantLocation(
     // ignore
   }
 
-  // Fallback
+  // Fallback (로컬)
   const room = await getRoom(roomId);
   if (!room) throw new Error('방을 찾을 수 없습니다.');
 
   const updatedParticipants = room.participants.map((p) =>
-    p.id === participantId ? { ...p, lat, lng, address_name: addressName } : p
+    p.id === participantId ? { ...p, name, lat, lng, address_name: addressName } : p
   );
 
   let midpointResult = room.midpoint_result || null;
+  if (updatedParticipants.length >= 2) {
+    midpointResult = await computeFullMidpointResult(updatedParticipants);
+  } else {
+    midpointResult = null;
+  }
+
+  const finalParticipants = midpointResult
+    ? enrichParticipantsWithDistances(updatedParticipants, midpointResult.center_lat, midpointResult.center_lng)
+    : updatedParticipants;
+
+  const updatedRoom: Room = {
+    ...room,
+    participants: finalParticipants,
+    midpoint_result: midpointResult,
+    status: midpointResult ? 'calculated' : 'gathering',
+  };
+
+  localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}${roomId}`, JSON.stringify(updatedRoom));
+  return updatedRoom;
+}
+
+// 기존 위치 전용 수정 함수 (호환성 유지)
+export async function updateParticipantLocation(
+  roomId: string,
+  participantId: string,
+  lat: number,
+  lng: number,
+  addressName: string
+): Promise<Room> {
+  const room = await getRoom(roomId);
+  const target = room?.participants.find((p) => p.id === participantId);
+  return updateParticipantProfile(roomId, participantId, target?.name || '', lat, lng, addressName);
+}
+
+// 5. 참가자 삭제/퇴장 API
+export async function deleteParticipant(roomId: string, participantId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/rooms/${roomId}/participants/${participantId}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      // 내 ID인 경우 로컬 스토리지 저장값 제거
+      if (getStoredParticipantId(roomId) === participantId) {
+        removeStoredParticipantId(roomId);
+      }
+      return true;
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  // Fallback (로컬)
+  const room = await getRoom(roomId);
+  if (!room) return false;
+
+  const updatedParticipants = room.participants.filter((p) => p.id !== participantId);
+  let midpointResult = null;
   if (updatedParticipants.length >= 2) {
     midpointResult = await computeFullMidpointResult(updatedParticipants);
   }
@@ -220,8 +278,38 @@ export async function updateParticipantLocation(
     ...room,
     participants: finalParticipants,
     midpoint_result: midpointResult,
+    status: midpointResult ? 'calculated' : 'gathering',
   };
 
   localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}${roomId}`, JSON.stringify(updatedRoom));
-  return updatedRoom;
+  if (getStoredParticipantId(roomId) === participantId) {
+    removeStoredParticipantId(roomId);
+  }
+  return true;
+}
+
+// 6. 모임 방 삭제 API (방장 전용)
+export async function deleteRoom(roomId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/rooms/${roomId}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      removeStoredParticipantId(roomId);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY_PREFIX}${roomId}`);
+      return true;
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  // Fallback (로컬)
+  localStorage.removeItem(`${LOCAL_STORAGE_KEY_PREFIX}${roomId}`);
+  removeStoredParticipantId(roomId);
+  return true;
+}
+
+// 참가자 ID 스토리지 제거 헬퍼
+export function removeStoredParticipantId(roomId: string) {
+  localStorage.removeItem(`meet_point_my_pid_${roomId}`);
 }

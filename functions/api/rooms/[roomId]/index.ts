@@ -24,9 +24,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // 만료 확인 (24시간)
+    // 만료 확인 (3일)
     if (Date.now() > room.expires_at) {
-      return new Response(JSON.stringify({ error: '만료된 모임 방입니다. (생성 후 24시간 경과)' }), {
+      return new Response(JSON.stringify({ error: '만료된 모임 방입니다. (생성 후 3일 경과)' }), {
         status: 410,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -64,6 +64,29 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   } catch (error: any) {
     console.error('Error fetching room:', error);
     return new Response(JSON.stringify({ error: error.message || '방 조회 중 오류가 발생했습니다.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+// 방 삭제 (방장 전용 모임 삭제)
+export const onRequestDelete: PagesFunction<Env> = async (context) => {
+  try {
+    const { params, env } = context;
+    const roomId = params.roomId as string;
+
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM participants WHERE room_id = ?`).bind(roomId),
+      env.DB.prepare(`DELETE FROM rooms WHERE id = ?`).bind(roomId),
+    ]);
+
+    return new Response(JSON.stringify({ success: true, message: '모임 방이 삭제되었습니다.' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error.message || '방 삭제 중 오류가 발생했습니다.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

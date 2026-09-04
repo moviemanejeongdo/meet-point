@@ -83,38 +83,37 @@ export const ShareBar: React.FC<ShareBarProps> = ({ room }) => {
     <div
       className="glass-panel"
       style={{
-        padding: '12px 16px',
+        padding: '12px 14px',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
+        flexDirection: 'column',
+        gap: 10,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <Share2 size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
-        <span style={{ fontSize: 13, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          친구들을 초대해 위치를 모아보세요
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Share2 size={15} color="var(--primary)" style={{ flexShrink: 0 }} />
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+          친구 초대 링크 공유
         </span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <button
           onClick={handleKakaoShare}
           className="btn btn-kakao btn-sm"
-          style={{ gap: 4 }}
+          style={{ width: '100%', gap: 5, padding: '9px 0', fontSize: 13, whiteSpace: 'nowrap' }}
           title="카카오톡으로 공유하기"
         >
-          <MessageCircle size={14} />
+          <MessageCircle size={15} />
           카톡 공유
         </button>
 
         <button
           onClick={handleCopyLink}
           className="btn btn-secondary btn-sm"
-          style={{ gap: 4 }}
+          style={{ width: '100%', gap: 5, padding: '9px 0', fontSize: 13, whiteSpace: 'nowrap' }}
           title="초대 링크 복사"
         >
-          {isCopied ? <Check size={14} color="var(--accent-green)" /> : <Copy size={14} />}
+          {isCopied ? <Check size={15} color="var(--accent-green)" /> : <Copy size={15} />}
           {isCopied ? '복사 완료!' : '링크 복사'}
         </button>
       </div>
