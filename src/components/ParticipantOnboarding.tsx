@@ -46,7 +46,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
       }}
     >
       <div
-        className="glass-panel-glow"
+        className="apple-card"
         style={{
           width: '100%',
           maxWidth: 480,
@@ -57,9 +57,9 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
         {/* 상단 모임 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img
-            src="/app-icon.png"
+            src="/app-icon.svg"
             alt="얼중간"
-            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 12px auto', display: 'block', boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
+            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 12px auto', display: 'block', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)', border: '1px solid rgba(255, 255, 255, 0.12)' }}
           />
           <div
             className="badge badge-primary"

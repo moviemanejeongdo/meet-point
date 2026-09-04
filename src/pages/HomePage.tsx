@@ -46,71 +46,94 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
     <div
       style={{
         minHeight: '100vh',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 16px',
+        justifyContent: 'flex-start',
+        padding: '48px 16px 64px 16px',
       }}
     >
-      {/* 얼중간 공식 앱 아이콘 및 히어로 헤더 */}
-      <div style={{ textAlign: 'center', maxWidth: 540, marginBottom: 28 }}>
-        <div style={{ display: 'inline-block', position: 'relative', marginBottom: 16 }}>
-          <img
-            src="/app-icon.png"
-            alt="얼중간 앱 아이콘"
-            style={{
-              width: 84,
-              height: 84,
-              borderRadius: 22,
-              boxShadow: '0 8px 30px rgba(99, 102, 241, 0.45)',
-              border: '2px solid rgba(255, 255, 255, 0.15)',
-              display: 'block',
-              margin: '0 auto',
-            }}
-          />
-        </div>
+      {/* 상단 헤더 섹션: 완벽한 중앙 정렬 */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 440,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          marginBottom: 28,
+        }}
+      >
+        {/* 심플한 애플 스타일 ㅇㅈㄱ 앱 아이콘 */}
+        <img
+          src="/app-icon.svg"
+          alt="얼중간 ㅇㅈㄱ 공식 아이콘"
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: 18,
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+            marginBottom: 16,
+            display: 'block',
+          }}
+        />
 
+        {/* 미니멀 배지 */}
         <div
           className="badge badge-primary"
-          style={{ marginBottom: 14, padding: '6px 14px', fontSize: 13 }}
+          style={{ marginBottom: 12, padding: '5px 14px', fontSize: 12 }}
         >
-          <Sparkles size={14} />
+          <Sparkles size={13} />
           친구 모임 중간장소 찾기 · 얼중간
         </div>
 
+        {/* 타이틀 */}
         <h1
           style={{
-            fontSize: 'clamp(28px, 6vw, 40px)',
-            fontWeight: 900,
-            lineHeight: 1.25,
-            marginBottom: 14,
-            background: 'linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            fontSize: 'clamp(24px, 5.5vw, 32px)',
+            fontWeight: 800,
+            lineHeight: 1.3,
+            letterSpacing: '-0.03em',
+            marginBottom: 10,
+            color: '#ffffff',
+            wordBreak: 'keep-all',
           }}
         >
-          어디서 볼까?<br />얼추 중간에서 보자, 얼중간!
+          어디서 볼까?<br />
+          얼추 중간에서 보자, 얼중간
         </h1>
 
-        <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.65, padding: '0 8px' }}>
-          친구들 출발 위치만 쏙쏙 모으면, 누구 하나 억울하지 않게 이동 시간과 거리가 가장 공평한 최적의 중간 장소와 주변 맛집을 딱 정해드립니다.
+        {/* 부제 설명 */}
+        <p
+          style={{
+            fontSize: 14,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+            wordBreak: 'keep-all',
+            maxWidth: 380,
+            margin: '0 auto',
+          }}
+        >
+          친구들 출발 위치만 모으면 가장 공평한 최적의 중간 장소와 주변 추천 핫플레이스를 바로 찾아드립니다.
         </p>
       </div>
 
-      {/* 방 만들기 카드 */}
+      {/* 방 만들기 카드: 애플 스타일 카드 */}
       <div
-        className="glass-panel-glow"
+        className="apple-card"
         style={{
           width: '100%',
-          maxWidth: 460,
+          maxWidth: 440,
           padding: '28px 24px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-          <Compass size={20} color="var(--primary)" />
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>
-            새로운 얼중간 모임 방 만들기
+          <Compass size={18} color="var(--primary)" />
+          <h2 style={{ fontSize: 17, fontWeight: 700, color: '#f8fafc' }}>
+            새로운 모임 방 만들기
           </h2>
         </div>
 
@@ -164,6 +187,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
                 border: hostLocation ? '1px solid var(--primary)' : '1px solid var(--border-color)',
                 fontSize: 14,
                 fontWeight: hostLocation ? 600 : 400,
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-input)',
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -183,7 +208,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
             style={{
               width: '100%',
               padding: '14px',
-              fontSize: 16,
+              fontSize: 15,
               opacity: !hostName.trim() || !hostLocation ? 0.6 : 1,
             }}
           >
@@ -202,9 +227,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToRoom }) => {
       {/* 하단 특징 안내 뱃지 */}
       <div
         style={{
+          width: '100%',
+          maxWidth: 440,
           display: 'flex',
-          gap: 18,
-          marginTop: 28,
+          gap: 16,
+          marginTop: 24,
           flexWrap: 'wrap',
           justifyContent: 'center',
         }}
