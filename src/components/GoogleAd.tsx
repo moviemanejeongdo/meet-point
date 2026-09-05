@@ -21,6 +21,10 @@ interface GoogleAdProps {
 const DEFAULT_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || 'ca-pub-5259987610871467';
 const DEFAULT_SLOT = import.meta.env.VITE_ADSENSE_SLOT || '9292546942';
 
+// 알리익스프레스 제휴 광고 (구글 애드센스 승인 대기 기간 스마트 폴백)
+const ALI_AD_URL = 'https://s.click.aliexpress.com/e/_c4UhqpfJ?bz=725*90';
+const ALI_IMAGE_URL = 'https://ae-pic-a1.aliexpress-media.com/kf/Sf75131fc3b09413e8f73ffab578cfd10g.png';
+
 export const GoogleAd: React.FC<GoogleAdProps> = ({
   slot = DEFAULT_SLOT,
   client = DEFAULT_CLIENT,
@@ -75,7 +79,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
     return null;
   }
 
-  // 1. 지도 하단 전용 컴팩트 배너 (높이 60px 이하 엄격 제한)
+  // 1. 지도 하단 전용 컴팩트 배너 (높이 56px 엄격 제한)
   if (variant === 'compact') {
     return (
       <div
@@ -83,7 +87,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '460px',
           height: '56px',
           maxHeight: '56px',
           background: 'rgba(15, 23, 42, 0.94)',
@@ -95,7 +99,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '0 12px',
+          padding: '0 8px',
           boxSizing: 'border-box',
           ...style,
         }}
@@ -115,9 +119,13 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
           <span
             style={{
               fontSize: '9px',
-              color: 'rgba(148, 163, 184, 0.6)',
+              color: 'rgba(148, 163, 184, 0.7)',
               letterSpacing: '0.04em',
               lineHeight: 1,
+              background: 'rgba(0, 0, 0, 0.4)',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              fontWeight: 600,
             }}
           >
             AD
@@ -129,11 +137,11 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
                 setIsClosed(true);
               }}
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
+                background: 'rgba(0, 0, 0, 0.4)',
                 border: 'none',
                 borderRadius: '50%',
-                width: 16,
-                height: 16,
+                width: 18,
+                height: 18,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -148,45 +156,55 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
           )}
         </div>
 
-        {/* 광고 미송출(Unfilled/심사중) 시 은은한 광고 문의 안내 */}
+        {/* 구글 광고 미송출(Unfilled/심사중) 시 알리익스프레스 제휴 배너 노출 */}
         {!isAdFilled && (
-          <div
+          <a
+            href={ALI_AD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              position: 'absolute',
-              inset: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
-              fontSize: '11px',
-              color: 'var(--text-secondary)',
-              zIndex: 10,
-              pointerEvents: 'auto',
-              padding: '0 24px 0 10px',
+              width: '100%',
+              height: '100%',
+              textDecoration: 'none',
+              paddingRight: '28px',
+              boxSizing: 'border-box',
             }}
+            title="알리익스프레스 특가 확인하기"
           >
-            <Mail size={12} color="var(--primary)" />
-            <span style={{ fontWeight: 600, color: '#f8fafc' }}>광고 문의:</span>
-            <a
-              href="mailto:moviemanejeongdo@gmail.com"
+            <img
+              src={ALI_IMAGE_URL}
+              alt="알리익스프레스 특가 배너"
               style={{
-                color: 'var(--accent-cyan)',
-                textDecoration: 'none',
-                fontWeight: 600,
+                maxWidth: '100%',
+                height: '42px',
+                objectFit: 'contain',
+                borderRadius: '6px',
+                display: 'block',
               }}
-            >
-              moviemanejeongdo@gmail.com
-            </a>
-          </div>
+            />
+          </a>
         )}
 
-        {/* 실제 구글 애드센스 ins 태그 */}
-        <div style={{ width: '100%', height: '50px', maxHeight: '50px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {/* 실제 구글 애드센스 ins 태그 (승인 후 송출 시 활성화) */}
+        <div
+          style={{
+            width: '100%',
+            height: '50px',
+            maxHeight: '50px',
+            overflow: 'hidden',
+            display: isAdFilled ? 'flex' : 'none',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <ins
             ref={adRef}
             className="adsbygoogle"
             style={{
-              display: 'block',
+              display: isAdFilled ? 'block' : 'none',
               width: '100%',
               height: '50px',
               maxHeight: '50px',
@@ -240,7 +258,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
             fontWeight: 600,
           }}
         >
-          광고
+          스폰서 광고
         </span>
 
         {allowClose && (
@@ -262,40 +280,76 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
         )}
       </div>
 
-      {/* 광고 미송출(심사 대기/Unfilled) 시 노출되는 '광고 문의' 배너 */}
+      {/* 구글 광고 미송출(심사 대기/Unfilled) 시 알리익스프레스 제휴 배너 노출 */}
       {!isAdFilled && (
-        <div
-          style={{
-            width: '100%',
-            padding: '12px 10px',
-            borderRadius: 'var(--radius-sm)',
-            background: 'rgba(30, 41, 59, 0.5)',
-            border: '1px dashed rgba(255, 255, 255, 0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          <Mail size={14} color="var(--primary)" />
-          <span style={{ fontWeight: 600, color: '#f8fafc' }}>광고 문의</span>
-          <span style={{ color: 'var(--text-muted)' }}>·</span>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <a
-            href="mailto:moviemanejeongdo@gmail.com"
+            href={ALI_AD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              color: 'var(--accent-cyan)',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               textDecoration: 'none',
-              fontWeight: 600,
+              borderRadius: '8px',
+              overflow: 'hidden',
+              background: 'rgba(30, 41, 59, 0.4)',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            }}
+            title="알리익스프레스 특가 상품 보러가기"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            moviemanejeongdo@gmail.com
+            <img
+              src={ALI_IMAGE_URL}
+              alt="알리익스프레스 제휴 특가 배너"
+              style={{
+                width: '100%',
+                maxWidth: '725px',
+                height: 'auto',
+                aspectRatio: '725 / 90',
+                objectFit: 'contain',
+                display: 'block',
+                borderRadius: '8px',
+              }}
+            />
           </a>
+
+          {/* 은은한 광고 문의 안내 링크 */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              fontSize: '11px',
+              color: 'var(--text-secondary)',
+              marginTop: '2px',
+            }}
+          >
+            <Mail size={12} color="var(--primary)" />
+            <span>광고 문의:</span>
+            <a
+              href="mailto:moviemanejeongdo@gmail.com"
+              style={{
+                color: 'var(--accent-cyan)',
+                textDecoration: 'none',
+                fontWeight: 500,
+              }}
+            >
+              moviemanejeongdo@gmail.com
+            </a>
+          </div>
         </div>
       )}
 
-      {/* 실제 구글 애드센스 ins 태그 */}
+      {/* 실제 구글 애드센스 ins 태그 (승인 후 송출 시 활성화) */}
       <ins
         ref={adRef}
         className="adsbygoogle"
