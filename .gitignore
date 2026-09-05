@@ -29,3 +29,7 @@ key.md
 *.njsproj
 *.sln
 *.sw?
+
+# Internal AI Docs
+00.만남장소중간_코드위키.md
+00.만남장소중간_코드위치.md
