@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_01.mp3",
+    "text": "주말에 친구들이랑 모이기로 했는데, 어디서 만날지 아직도 싸우고 계신가요?",
+    "subtitle": "주말 약속 어디서 만날지 아직도 싸우시나요?",
+    "theme": "hook"
+  },
+  {
+    "id": 2,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_02.mp3",
+    "text": "홍대? 강남? 누구는 10분, 누구는 1시간 걸리면 진짜 불공평하잖아요!",
+    "subtitle": "누구는 10분, 누구는 1시간! 진짜 불공평하죠?",
+    "theme": "conflict"
+  },
+  {
+    "id": 3,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_03.mp3",
+    "text": "이제 싸우지 마세요! 친구 모임 중간장소 찾기, 얼중간이 해결해 드립니다!",
+    "subtitle": "이제 싸우지 마세요! '얼중간'이 해결해 드립니다!",
+    "theme": "solution"
+  },
+  {
+    "id": 4,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_04.mp3",
+    "text": "방 만들고 카톡 링크만 쓱 공유하면 끝! 친구들이 각자 출발지만 찍으면...",
+    "subtitle": "카톡 링크 공유하고 각자 출발지만 찍으면 끝!",
+    "theme": "step1"
+  },
+  {
+    "id": 5,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_05.mp3",
+    "text": "모두에게 가장 공평한 최적의 지하철역과 이동 시간을 1초 만에 딱 찾아줍니다!",
+    "subtitle": "모두에게 공평한 최적의 중간역과 소요 시간 도출!",
+    "theme": "step2"
+  },
+  {
+    "id": 6,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_06.mp3",
+    "text": "게다가 중간역 주변의 인기 맛집과 추천 카페까지 한 번에 보여줍니다!",
+    "subtitle": "주변 추천 맛집과 감성 카페까지 한눈에!",
+    "theme": "places"
+  },
+  {
+    "id": 7,
+    "audio_file": "e:/unity 26.04.28/만남장소중간지점찾기/shorts/audio/scene_07.mp3",
+    "text": "약속 장소 고민 끝! 지금 검색창에 얼중간을 검색하거나 링크로 바로 접속해보세요!",
+    "subtitle": "약속 장소 고민 끝! 검색창에 '얼중간'을 검색해보세요!",
+    "theme": "cta"
+  }
+]

@@ -1,0 +1,30 @@
+[Script Info]
+Title: 얼중간 유튜브 쇼츠 자막
+ScriptType: v4.00+
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.601
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: ShortsDefault,NanumSquareRoundEB,54,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,5.0,3.0,2,60,60,340,1
+Style: ShortsHighlight,NanumSquareRoundEB,56,&H0000E6FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,5.5,3.5,2,60,60,340,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.60,ShortsDefault,,0,0,340,,주말에 친구들이랑 모이기로 했는데,
+Dialogue: 0,0:00:02.60,0:00:05.45,ShortsHighlight,,0,0,340,,{\c&H0000E6FF}어디서 만날지{\c&HFFFFFF} 아직도 싸우시나요?
+Dialogue: 0,0:00:05.80,0:00:09.50,ShortsDefault,,0,0,340,,홍대? 강남? 누구는 10분, {\c&H0000E6FF}누구는 1시간!{\c&HFFFFFF}
+Dialogue: 0,0:00:09.50,0:00:13.48,ShortsHighlight,,0,0,340,,이러면 진짜 {\c&H0000E6FF}너무 불공평하잖아요!{\c&HFFFFFF}
+Dialogue: 0,0:00:13.83,0:00:16.80,ShortsDefault,,0,0,340,,이제 약속 장소로 싸우지 마세요!
+Dialogue: 0,0:00:16.80,0:00:20.24,ShortsHighlight,,0,0,340,,친구 모임 중간장소 찾기, {\c&H0000E6FF}'얼중간'{\c&HFFFFFF}!
+Dialogue: 0,0:00:20.59,0:00:23.80,ShortsDefault,,0,0,340,,방 만들고 {\c&H0000E6FF}카톡 링크만{\c&HFFFFFF} 쓱 공유하면 끝!
+Dialogue: 0,0:00:23.80,0:00:26.66,ShortsHighlight,,0,0,340,,친구들이 각자 {\c&H0000E6FF}출발지만 찍으면...{\c&HFFFFFF}
+Dialogue: 0,0:00:27.01,0:00:30.10,ShortsDefault,,0,0,340,,모두에게 공평한 {\c&H0000E6FF}최적의 지하철역{\c&HFFFFFF}과
+Dialogue: 0,0:00:30.10,0:00:33.18,ShortsHighlight,,0,0,340,,소요 시간을 {\c&H0000E6FF}1초 만에 딱{\c&HFFFFFF} 찾아줍니다!
+Dialogue: 0,0:00:33.53,0:00:36.10,ShortsDefault,,0,0,340,,게다가 중간역 주변 {\c&H0000E6FF}인기 맛집{\c&HFFFFFF}과
+Dialogue: 0,0:00:36.10,0:00:38.78,ShortsHighlight,,0,0,340,,{\c&H0000E6FF}추천 카페까지{\c&HFFFFFF} 한 번에 보여줍니다!
+Dialogue: 0,0:00:39.13,0:00:42.50,ShortsDefault,,0,0,340,,약속 장소 고민 끝! {\c&H0000E6FF}얼추 중간에서 보자!{\c&HFFFFFF}
+Dialogue: 0,0:00:42.50,0:00:46.50,ShortsHighlight,,0,0,340,,지금 검색창에 {\c&H0000E6FF}'얼중간'{\c&HFFFFFF}을 검색해보세요!

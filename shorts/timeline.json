@@ -1,0 +1,54 @@
+{
+  "total_duration": 47.46,
+  "scenes": [
+    {
+      "scene": 1,
+      "start": 0.0,
+      "end": 5.448,
+      "duration": 5.448,
+      "audio": "shorts/audio/scene_01.mp3"
+    },
+    {
+      "scene": 2,
+      "start": 5.798,
+      "end": 13.478,
+      "duration": 7.68,
+      "audio": "shorts/audio/scene_02.mp3"
+    },
+    {
+      "scene": 3,
+      "start": 13.828,
+      "end": 20.236,
+      "duration": 6.408,
+      "audio": "shorts/audio/scene_03.mp3"
+    },
+    {
+      "scene": 4,
+      "start": 20.586,
+      "end": 26.658,
+      "duration": 6.072,
+      "audio": "shorts/audio/scene_04.mp3"
+    },
+    {
+      "scene": 5,
+      "start": 27.008,
+      "end": 33.176,
+      "duration": 6.168,
+      "audio": "shorts/audio/scene_05.mp3"
+    },
+    {
+      "scene": 6,
+      "start": 33.526,
+      "end": 38.782,
+      "duration": 5.256,
+      "audio": "shorts/audio/scene_06.mp3"
+    },
+    {
+      "scene": 7,
+      "start": 39.132,
+      "end": 46.26,
+      "duration": 7.128,
+      "audio": "shorts/audio/scene_07.mp3"
+    }
+  ]
+}
