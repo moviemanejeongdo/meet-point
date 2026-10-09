@@ -69,7 +69,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '24px' }}>
           {/* 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <User size={18} color="var(--primary)" /> 내 정보 관리
             </h3>
             <button
@@ -90,7 +90,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             {/* 닉네임 입력 */}
             <div style={{ marginBottom: 18 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                내 닉네임 {isHost && <span style={{ color: '#f59e0b', fontSize: 12 }}>👑 (방장)</span>}
+                내 닉네임 {isHost && <span style={{ color: 'var(--accent-gold-text)', fontSize: 12 }}>👑 (방장)</span>}
               </label>
               <input
                 type="text"
@@ -111,7 +111,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 style={{
                   padding: '12px 14px',
                   background: 'var(--bg-input)',
-                  border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-sm)',
                   display: 'flex',
                   alignItems: 'center',
@@ -121,7 +120,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
                   <MapPin size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {location.addressName}
                   </span>
                 </div>
@@ -171,9 +170,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 style={{
                   width: '100%',
                   padding: '11px 0',
-                  color: '#60a5fa',
-                  borderColor: 'rgba(59, 130, 246, 0.4)',
-                  background: 'rgba(59, 130, 246, 0.08)',
+                  color: 'var(--primary-strong-text)',
+                  background: 'var(--primary-weak)',
                   gap: 6,
                   fontSize: 14,
                 }}
@@ -194,9 +192,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 style={{
                   width: '100%',
                   padding: '11px 0',
-                  color: '#f87171',
-                  borderColor: 'rgba(239, 68, 68, 0.35)',
-                  background: 'rgba(239, 68, 68, 0.06)',
+                  color: 'var(--danger)',
+                  background: 'var(--danger-weak)',
                   gap: 6,
                   fontSize: 14,
                 }}

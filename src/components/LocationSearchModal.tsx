@@ -93,7 +93,7 @@ export const LocationSearchModal: React.FC<LocationSearchModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <MapPin size={20} color="var(--primary)" />
               출발 위치 찾기
             </h3>
@@ -128,7 +128,7 @@ export const LocationSearchModal: React.FC<LocationSearchModalProps> = ({
             className="btn btn-secondary"
             style={{ width: '100%', marginTop: 12, justifyContent: 'center', fontSize: 14 }}
           >
-            <Navigation size={16} color="var(--accent-cyan)" />
+            <Navigation size={16} color="var(--primary)" />
             {isGpsLoading ? '현재 GPS 위치 확인 중...' : '현재 내 위치로 설정하기'}
           </button>
         </div>
@@ -157,7 +157,7 @@ export const LocationSearchModal: React.FC<LocationSearchModalProps> = ({
                   onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-color)')}
                 >
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: 15, color: '#ffffff', marginBottom: 3 }}>
+                    <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', marginBottom: 3 }}>
                       {place.place_name}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>

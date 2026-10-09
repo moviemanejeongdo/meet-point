@@ -274,21 +274,21 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           bottom: ${dotRadius + 5}px;
           transform: translateX(-50%);
           white-space: nowrap;
-          background: #1e293b;
-          color: #f8fafc;
+          background: #ffffff;
+          color: #191f28;
           padding: 4px 10px;
           border-radius: 20px;
           font-size: 12px;
           font-weight: 700;
-          border: 2px solid ${isHost ? '#f59e0b' : '#3b82f6'};
-          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          border: 2px solid ${isHost ? '#f59e0b' : '#3182f6'};
+          box-shadow: 0 4px 12px rgba(0,23,51,0.18);
           display: flex;
           align-items: center;
           gap: 4px;
           z-index: 3;
         ">
           ${isHost ? '👑 ' : ''}${p.name}
-          ${p.distance_meters ? `<span style="color:#94a3b8;font-size:11px;">(${Math.round(p.distance_meters / 100) / 10}km${p.duration_minutes ? `, 약 ${p.duration_minutes}분` : ''})</span>` : ''}
+          ${p.distance_meters ? `<span style="color:#6b7684;font-size:11px;">(${Math.round(p.distance_meters / 100) / 10}km${p.duration_minutes ? `, 약 ${p.duration_minutes}분` : ''})</span>` : ''}
         </div>
         <div style="
           position: absolute;
@@ -296,11 +296,11 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           top: -${dotRadius}px;
           width: ${dotSize}px;
           height: ${dotSize}px;
-          background: ${isHost ? '#f59e0b' : '#3b82f6'};
+          background: ${isHost ? '#f59e0b' : '#3182f6'};
           border-radius: 50%;
           border: 2px solid #ffffff;
           box-sizing: border-box;
-          box-shadow: ${isHost ? '0 0 0 4px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0,0,0,0.5)' : '0 2px 6px rgba(0,0,0,0.5)'};
+          box-shadow: ${isHost ? '0 0 0 4px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0,23,51,0.3)' : '0 2px 6px rgba(0,23,51,0.3)'};
           ${isHost ? 'animation: pulseGlowGold 2s infinite;' : ''}
           z-index: 2;
         "></div>
@@ -351,7 +351,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           border-radius: 20px;
           font-size: 13px;
           font-weight: 800;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 6px 20px rgba(0, 23, 51, 0.25);
           border: 2px solid #ffffff;
           display: flex;
           align-items: center;
@@ -370,7 +370,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           border: 3.5px solid ${motionConfig.strokeColor(false)};
           border-radius: 50%;
           box-sizing: border-box;
-          box-shadow: 0 0 0 6px ${motionConfig.pinGlowColor}, 0 4px 12px rgba(0,0,0,0.5);
+          box-shadow: 0 0 0 6px ${motionConfig.pinGlowColor}, 0 4px 12px rgba(0,23,51,0.25);
           animation: pulseGlow 2s infinite;
           z-index: 2;
         "></div>
@@ -493,7 +493,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
           border: 2px solid white;
           border-radius: 50%;
           box-sizing: border-box;
-          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.4), 0 2px 8px rgba(0,0,0,0.5);
+          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.4), 0 2px 8px rgba(0,23,51,0.3);
           z-index: 2;
         "></div>
       `;
@@ -556,7 +556,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
         style={{
           width: '100%',
           height: '100%',
-          backgroundColor: '#0f172a',
+          backgroundColor: 'var(--grey-100)',
         }}
       />
 
@@ -571,7 +571,7 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 12,
-            background: 'rgba(15, 23, 42, 0.8)',
+            background: 'rgba(242, 244, 246, 0.9)',
             zIndex: 10,
           }}
         >
@@ -590,12 +590,12 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             padding: 20,
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: 'var(--bg-secondary)',
             zIndex: 10,
           }}
         >
           <div
-            className="glass-card"
+            className="apple-card"
             style={{
               maxWidth: 420,
               width: '100%',
@@ -604,8 +604,6 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
               display: 'flex',
               flexDirection: 'column',
               gap: 14,
-              border: '1px solid rgba(245, 158, 11, 0.4)',
-              boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
             }}
           >
             <div
@@ -613,8 +611,8 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
                 width: 48,
                 height: 48,
                 borderRadius: '50%',
-                background: 'rgba(245, 158, 11, 0.15)',
-                color: '#f59e0b',
+                background: 'var(--accent-gold-weak)',
+                color: 'var(--accent-gold)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -634,17 +632,16 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
 
             <div
               style={{
-                background: 'rgba(0,0,0,0.4)',
+                background: 'var(--grey-100)',
                 padding: '12px 14px',
                 borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(255,255,255,0.08)',
                 textAlign: 'left',
                 fontSize: 12,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 6,
                 fontFamily: 'monospace',
-                color: '#38bdf8',
+                color: 'var(--grey-800)',
               }}
             >
               <div>• https://meet-point-aql.pages.dev</div>

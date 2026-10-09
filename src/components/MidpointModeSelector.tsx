@@ -24,9 +24,9 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
   return (
     <div
       style={{
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: '#ffffff',
+        border: '1px solid var(--border-color)',
+        boxShadow: 'var(--shadow-sm)',
         borderRadius: 'var(--radius-md)',
         overflow: 'hidden',
         transition: 'all 0.2s ease',
@@ -60,8 +60,8 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
                 fontSize: 10,
                 padding: '2px 6px',
                 borderRadius: 10,
-                background: currentMode === 'transit' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                color: currentMode === 'transit' ? '#60a5fa' : 'var(--text-muted)',
+                background: currentMode === 'transit' ? 'var(--primary-weak)' : 'var(--grey-100)',
+                color: currentMode === 'transit' ? 'var(--primary-strong-text)' : 'var(--text-muted)',
                 fontWeight: 600,
                 whiteSpace: 'nowrap',
               }}
@@ -81,12 +81,12 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
       {isOpen && (
         <div
           style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: '1px solid var(--border-color)',
             padding: '8px',
             display: 'flex',
             flexDirection: 'column',
             gap: 6,
-            background: 'rgba(15, 23, 42, 0.85)',
+            background: 'var(--grey-50)',
           }}
         >
           <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '2px 6px', marginBottom: 2 }}>
@@ -102,8 +102,8 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
                 style={{
                   padding: '10px 12px',
                   borderRadius: 'var(--radius-sm)',
-                  background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                  border: isSelected ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid transparent',
+                  background: isSelected ? 'var(--primary-weak)' : '#ffffff',
+                  border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border-color)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -116,7 +116,7 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
                   <span style={{ fontSize: 18, marginTop: 1 }}>{option.icon}</span>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: isSelected ? '#93c5fd' : 'var(--text-primary)' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: isSelected ? 'var(--primary-strong-text)' : 'var(--text-primary)' }}>
                         {option.label}
                       </span>
                       <span
@@ -124,7 +124,7 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
                           fontSize: 10,
                           padding: '1px 5px',
                           borderRadius: 8,
-                          background: 'rgba(255, 255, 255, 0.06)',
+                          background: 'var(--grey-100)',
                           color: 'var(--text-muted)',
                         }}
                       >
@@ -138,7 +138,7 @@ export const MidpointModeSelector: React.FC<MidpointModeSelectorProps> = ({
                 </div>
 
                 {isSelected && (
-                  <div style={{ color: '#3b82f6', marginTop: 2, flexShrink: 0 }}>
+                  <div style={{ color: 'var(--primary)', marginTop: 2, flexShrink: 0 }}>
                     <Check size={16} />
                   </div>
                 )}

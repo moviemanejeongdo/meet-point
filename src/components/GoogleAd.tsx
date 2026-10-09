@@ -90,11 +90,10 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
           maxWidth: '460px',
           height: '56px',
           maxHeight: '56px',
-          background: 'rgba(15, 23, 42, 0.94)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          background: '#ffffff',
+          border: '1px solid var(--border-color)',
           borderRadius: '12px',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+          boxShadow: 'var(--shadow-md)',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
@@ -119,10 +118,10 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
           <span
             style={{
               fontSize: '9px',
-              color: 'rgba(148, 163, 184, 0.7)',
+              color: 'var(--grey-600)',
               letterSpacing: '0.04em',
               lineHeight: 1,
-              background: 'rgba(0, 0, 0, 0.4)',
+              background: 'var(--grey-100)',
               padding: '2px 4px',
               borderRadius: '4px',
               fontWeight: 600,
@@ -137,7 +136,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
                 setIsClosed(true);
               }}
               style={{
-                background: 'rgba(0, 0, 0, 0.4)',
+                background: 'var(--grey-100)',
                 border: 'none',
                 borderRadius: '50%',
                 width: 18,
@@ -146,7 +145,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#e2e8f0',
+                color: 'var(--grey-700)',
                 padding: 0,
               }}
               title="광고 닫기"
@@ -229,7 +228,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
         width: '100%',
         padding: '12px 14px',
         borderRadius: 'var(--radius-md)',
-        background: 'rgba(15, 23, 42, 0.75)',
+        background: '#ffffff',
         border: '1px solid var(--border-color)',
         overflow: 'hidden',
         display: 'flex',
@@ -253,7 +252,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
         <span
           style={{
             fontSize: '10px',
-            color: 'rgba(148, 163, 184, 0.6)',
+            color: 'var(--text-muted)',
             letterSpacing: '0.05em',
             fontWeight: 600,
           }}
@@ -268,7 +267,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: '#94a3b8',
+              color: 'var(--text-muted)',
               padding: 2,
               display: 'flex',
               alignItems: 'center',
@@ -295,7 +294,7 @@ export const GoogleAd: React.FC<GoogleAdProps> = ({
               textDecoration: 'none',
               borderRadius: '8px',
               overflow: 'hidden',
-              background: 'rgba(30, 41, 59, 0.4)',
+              background: 'var(--grey-50)',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
             title="알리익스프레스 특가 상품 보러가기"
