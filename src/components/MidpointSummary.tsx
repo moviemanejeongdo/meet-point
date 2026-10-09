@@ -52,10 +52,10 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* 1. 중간지점 요약 헤더 카드 */}
       <div
-        className="glass-panel-glow"
+        className="glass-panel"
         style={{
           padding: '18px 20px',
-          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(49, 46, 129, 0.5) 100%)',
+          background: 'linear-gradient(135deg, #ffffff 0%, var(--primary-weak) 100%)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -68,7 +68,7 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
           </span>
         </div>
 
-        <h3 style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', marginBottom: 12 }}>
+        <h3 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>
           {midpointResult.center_name}
         </h3>
 
@@ -89,7 +89,7 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
                 alignItems: 'center',
                 gap: 6,
                 padding: '5px 10px',
-                background: 'rgba(15, 23, 42, 0.6)',
+                background: '#ffffff',
                 borderRadius: 'var(--radius-full)',
                 fontSize: 12,
                 color: 'var(--text-secondary)',
@@ -98,15 +98,15 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent-cyan)';
-                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.85)';
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.background = 'var(--grey-50)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border-color)';
-                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                e.currentTarget.style.background = '#ffffff';
               }}
             >
-              <span style={{ fontWeight: 600, color: '#f8fafc' }}>{p.name}:</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}:</span>
               <span>{p.distance_meters ? formatDistance(p.distance_meters) : '-'}</span>
               {p.duration_minutes ? (
                 <span style={{ color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -126,7 +126,7 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 4,
           padding: '4px',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: 'var(--grey-200)',
           borderRadius: 'var(--radius-sm)',
         }}
       >
@@ -180,7 +180,7 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
                   padding: '12px 16px',
                   cursor: 'pointer',
                   border: isSelected ? '1px solid var(--accent-rose)' : '1px solid var(--border-color)',
-                  background: isSelected ? 'rgba(244, 63, 94, 0.1)' : 'var(--bg-card)',
+                  background: isSelected ? 'var(--accent-rose-weak)' : 'var(--bg-card)',
                   transition: 'all 0.15s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -189,7 +189,7 @@ export const MidpointSummary: React.FC<MidpointSummaryProps> = ({
               >
                 <div style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {place.place_name}
                     </span>
                     {place.distance ? (

@@ -496,7 +496,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
   if (!room) {
     return (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ fontSize: 18, color: '#f8fafc' }}>모임 방을 찾을 수 없습니다.</div>
+        <div style={{ fontSize: 18, color: 'var(--text-primary)' }}>모임 방을 찾을 수 없습니다.</div>
         <button onClick={onNavigateHome} className="btn btn-primary">홈으로 가기</button>
       </div>
     );
@@ -565,7 +565,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             참여자 목록 ({room.participants.length}명)
           </span>
           {isHost && (
-            <span style={{ fontSize: 11, color: '#38bdf8' }}>
+            <span style={{ fontSize: 11, color: 'var(--accent-cyan)' }}>
               방장 권한 활성화
             </span>
           )}
@@ -582,14 +582,14 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '10px 12px',
-                  background: isMe ? 'rgba(37, 99, 235, 0.12)' : 'rgba(15, 23, 42, 0.5)',
+                  background: isMe ? 'var(--primary-weak)' : 'var(--grey-50)',
                   borderRadius: 'var(--radius-sm)',
                   border: isMe ? '1px solid var(--primary)' : '1px solid var(--border-color)',
                   gap: 8,
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.name}
                     </span>
@@ -624,9 +624,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                       padding: '5px 8px',
                       fontSize: 11,
                       gap: 3,
-                      background: 'rgba(250, 204, 21, 0.12)',
-                      borderColor: 'rgba(250, 204, 21, 0.35)',
-                      color: '#fde047',
+                      background: '#fff6c2',
+                      color: '#6b5200',
                     }}
                     title={`${p.name}의 카카오맵 길찾기 열기`}
                   >
@@ -650,8 +649,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                         style={{
                           padding: '5px 8px',
                           fontSize: 11,
-                          color: '#f87171',
-                          borderColor: 'rgba(239, 68, 68, 0.3)',
+                          color: 'var(--danger)',
+                          background: 'var(--danger-weak)',
                           gap: 3,
                         }}
                         title={isHost ? '모임 삭제' : '모임 나가기'}
@@ -670,8 +669,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                       style={{
                         padding: '5px 8px',
                         fontSize: 11,
-                        color: '#f87171',
-                        borderColor: 'rgba(239, 68, 68, 0.3)',
+                        color: 'var(--danger)',
+                        background: 'var(--danger-weak)',
                         gap: 3,
                       }}
                       title="참가자 내보내기"
@@ -694,7 +693,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
       <header
         style={{
           padding: '10px 14px',
-          background: 'rgba(10, 14, 23, 0.95)',
+          background: 'rgba(255, 255, 255, 0.96)',
           backdropFilter: 'blur(12px)',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
@@ -713,8 +712,8 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             <ChevronLeft size={16} /> 홈
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <img src="/app-icon.svg" alt="얼중간" style={{ width: 22, height: 22, borderRadius: 6, border: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }} />
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <img src="/app-icon.svg" alt="얼중간" style={{ width: 22, height: 22, borderRadius: 6, border: '1px solid var(--border-color)', flexShrink: 0 }} />
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {room.title}
             </div>
             <span className="badge badge-primary" style={{ fontSize: 11, padding: '2px 8px', flexShrink: 0 }}>
@@ -727,7 +726,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
           <button
             onClick={handleSwitchProfile}
             className="btn btn-secondary btn-sm"
-            style={{ fontSize: 12, gap: 4, flexShrink: 0, padding: '6px 9px', color: '#94a3b8' }}
+            style={{ fontSize: 12, gap: 4, flexShrink: 0, padding: '6px 9px', color: 'var(--grey-600)' }}
             title="현재 연결된 프로필을 해제하고 다른 참가자로 변경하거나 새로 등록"
           >
             <UserCheck size={13} />
@@ -747,18 +746,24 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
 
       {/* 2. 모바일 전용 탭 바 (스마트폰 화면에서만 노출) */}
       <div className="mobile-tab-bar">
-        <button
-          onClick={() => setMobileTab('map')}
-          className={`mobile-tab-btn ${mobileTab === 'map' ? 'active' : ''}`}
-        >
-          <Map size={14} /> 지도 보기
-        </button>
-        <button
-          onClick={() => setMobileTab('info')}
-          className={`mobile-tab-btn ${mobileTab === 'info' ? 'active' : ''}`}
-        >
-          <List size={14} /> 모임 정보 & 추천장소
-        </button>
+        <div className="mobile-tab-track" role="tablist">
+          <button
+            role="tab"
+            aria-selected={mobileTab === 'map'}
+            onClick={() => setMobileTab('map')}
+            className={`mobile-tab-btn ${mobileTab === 'map' ? 'active' : ''}`}
+          >
+            <Map size={14} /> 지도 보기
+          </button>
+          <button
+            role="tab"
+            aria-selected={mobileTab === 'info'}
+            onClick={() => setMobileTab('info')}
+            className={`mobile-tab-btn ${mobileTab === 'info' ? 'active' : ''}`}
+          >
+            <List size={14} /> 모임 정보 & 추천장소
+          </button>
+        </div>
       </div>
 
       {/* 3. 메인 인터랙티브 영역 */}
@@ -779,8 +784,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
             style={{
               width: isMobile ? '100%' : 'clamp(340px, 32vw, 420px)',
               height: '100%',
-              background: 'rgba(15, 23, 42, 0.95)',
-              backdropFilter: 'blur(16px)',
+              background: 'var(--bg-secondary)',
               borderRight: isMobile ? 'none' : '1px solid var(--border-color)',
               overflowY: 'auto',
               padding: isMobile ? '14px 12px 24px 12px' : '16px',
@@ -842,11 +846,10 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    background: 'rgba(15, 23, 42, 0.94)',
-                    backdropFilter: 'blur(16px)',
+                    background: '#ffffff',
                     border: '1px solid var(--border-color)',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                    boxShadow: 'var(--shadow-lg)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -858,7 +861,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                     <div style={{ fontSize: 11, color: 'var(--accent-cyan)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <MapPin size={12} /> 최적 중간 장소
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {room.midpoint_result.center_name}
                     </div>
                   </div>
@@ -879,11 +882,10 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   style={{
                     width: '100%',
                     padding: '14px 16px',
-                    background: 'rgba(15, 23, 42, 0.94)',
-                    backdropFilter: 'blur(16px)',
-                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                    background: '#ffffff',
+                    border: '1px solid #ffe2a8',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                    boxShadow: 'var(--shadow-lg)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 10,
@@ -891,7 +893,7 @@ export const RoomPage: React.FC<RoomPageProps> = ({ roomId, onNavigateHome }) =>
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-gold-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span>👑</span> 방장 출발 위치 등록 완료
                     </div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>현재 1명 참여 중</span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HomePage } from './pages/HomePage';
+import { HomePage } from './pages/home/HomePage';
 import { RoomPage } from './pages/RoomPage';
 
 function parseRoomIdFromLocation(): string | null {

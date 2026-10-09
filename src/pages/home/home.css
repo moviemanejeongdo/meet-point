@@ -1,0 +1,400 @@
+/* 랜딩(방 만들기) 페이지 전용 스타일 */
+
+.home {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.home-header {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: block;
+}
+
+.home-brand {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* 히어로 */
+.home-hero {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 20px 8px;
+}
+
+.section-eyebrow {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.home-title {
+  font-size: clamp(30px, 8vw, 38px);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  word-break: keep-all;
+  margin-bottom: 14px;
+}
+
+.home-subtitle {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--grey-600);
+  word-break: keep-all;
+}
+
+.home-highlights {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.home-highlights li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: var(--radius-full);
+  background: var(--grey-100);
+  color: var(--grey-700);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-highlights svg {
+  color: var(--primary);
+}
+
+/* 방 만들기 폼 */
+.home-create {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px 56px;
+  scroll-margin-top: 16px;
+}
+
+.funnel {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px 20px 20px;
+}
+
+.funnel-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.funnel-progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--grey-200);
+  transition: background-color 0.3s ease;
+}
+
+.funnel-progress-bar.is-done {
+  background: var(--primary);
+}
+
+.funnel-question {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-primary);
+  white-space: pre-line;
+  word-break: keep-all;
+  margin-bottom: 24px;
+}
+
+.funnel-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+.funnel-field {
+  padding-bottom: 20px;
+}
+
+.funnel-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--grey-600);
+  margin-bottom: 8px;
+}
+
+.funnel-input {
+  height: 56px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.funnel-input::placeholder {
+  font-weight: 500;
+}
+
+.funnel-pin {
+  letter-spacing: 0.4em;
+}
+
+.funnel-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  word-break: keep-all;
+}
+
+.funnel-location {
+  width: 100%;
+  height: 56px;
+  padding: 0 14px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-input);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--grey-400);
+  font-size: 17px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.funnel-location:hover {
+  background: var(--grey-200);
+}
+
+.funnel-location:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.funnel-location.is-selected {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.funnel-location.is-selected svg:first-child {
+  color: var(--primary);
+}
+
+.funnel-location-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.funnel-location-action {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.funnel-cta {
+  width: 100%;
+  height: 56px;
+  font-size: 17px;
+  margin-top: 4px;
+}
+
+/* 아래로 스르륵 펼쳐지는 입력칸 */
+.reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: reveal 0.5s var(--ease-out) both;
+}
+
+.reveal-inner {
+  min-height: 0;
+  overflow: hidden;
+  /* 포커스 링(box-shadow)이 잘리지 않도록 여백 확보 */
+  padding: 4px;
+  margin: -4px;
+}
+
+@keyframes reveal {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 이렇게 써요 */
+.how {
+  background: var(--bg-secondary);
+  padding: 56px 0 64px;
+}
+
+.how-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.how .section-eyebrow,
+.how .section-title {
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.38;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  word-break: keep-all;
+}
+
+.how-list {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 0 20px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.how-list::-webkit-scrollbar {
+  display: none;
+}
+
+.how-item {
+  flex: 0 0 76%;
+  max-width: 300px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.phone {
+  padding: 8px;
+  border-radius: 36px;
+  background: var(--grey-900);
+  box-shadow: 0 20px 40px rgba(0, 23, 51, 0.18);
+}
+
+.phone-screen {
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.phone-screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.how-copy {
+  padding: 0 4px;
+}
+
+.how-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.how-item-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.how-item-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--grey-600);
+  word-break: keep-all;
+}
+
+@media (min-width: 768px) {
+  .how-list {
+    overflow: visible;
+    scroll-snap-type: none;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .how-item {
+    flex: 1 1 0;
+  }
+
+  .how .section-eyebrow,
+  .how .section-title {
+    text-align: center;
+  }
+}
+
+/* 마무리 CTA */
+.home-closing {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 56px 20px 24px;
+  text-align: center;
+}
+
+.home-closing-cta {
+  margin-top: 20px;
+  height: 56px;
+  padding: 0 28px;
+  font-size: 17px;
+}
+
+.home-ad {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 20px 48px;
+}

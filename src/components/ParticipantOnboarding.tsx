@@ -86,6 +86,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px 16px',
+        background: 'var(--bg-secondary)',
       }}
     >
       <div
@@ -102,7 +103,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
           <img
             src="/app-icon.svg"
             alt="얼중간"
-            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 12px auto', display: 'block', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)', border: '1px solid rgba(255, 255, 255, 0.12)' }}
+            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 12px auto', display: 'block', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)' }}
           />
           <div
             className="badge badge-primary"
@@ -111,7 +112,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
             <Sparkles size={13} />
             얼중간 모임 초대장
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#ffffff', marginBottom: 6 }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6, wordBreak: 'keep-all' }}>
             {room.title}
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
@@ -156,7 +157,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '10px 14px',
-                  background: 'rgba(15, 23, 42, 0.5)',
+                  background: 'var(--grey-50)',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border-color)',
                   gap: 8,
@@ -168,21 +169,21 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                       width: 28,
                       height: 28,
                       borderRadius: '50%',
-                      background: p.is_host ? 'rgba(245, 158, 11, 0.2)' : 'rgba(99, 102, 241, 0.2)',
+                      background: p.is_host ? 'var(--accent-gold-weak)' : 'var(--primary-weak)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: 13,
                       fontWeight: 700,
-                      color: p.is_host ? '#fbbf24' : '#818cf8',
+                      color: p.is_host ? 'var(--accent-gold-text)' : 'var(--primary-strong-text)',
                       flexShrink: 0,
                     }}
                   >
                     {p.is_host ? '👑' : p.name.charAt(0)}
                   </div>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {p.name} {p.is_host ? <span style={{ fontSize: 11, color: '#f59e0b' }}>(방장)</span> : null}
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.name} {p.is_host ? <span style={{ fontSize: 11, color: 'var(--accent-gold-text)' }}>(방장)</span> : null}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       출발: {p.address_name}
@@ -202,9 +203,8 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                         fontSize: 11,
                         flexShrink: 0,
                         gap: 4,
-                        borderColor: 'rgba(245, 158, 11, 0.4)',
-                        color: '#fbbf24',
-                        background: 'rgba(245, 158, 11, 0.08)',
+                        color: 'var(--accent-gold-text)',
+                        background: 'var(--accent-gold-weak)',
                       }}
                       title="방장 비밀번호 4자리 입력 후 입장"
                     >
@@ -221,8 +221,8 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                         fontSize: 11,
                         flexShrink: 0,
                         gap: 4,
-                        borderColor: 'rgba(59, 130, 246, 0.4)',
-                        color: '#60a5fa',
+                        color: 'var(--primary-strong-text)',
+                        background: 'var(--primary-weak)',
                       }}
                       title="이미 등록된 내 프로필로 바로 입장"
                     >
@@ -269,11 +269,13 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                color: location ? '#ffffff' : 'var(--text-muted)',
+                color: location ? 'var(--text-primary)' : 'var(--grey-400)',
                 cursor: 'pointer',
                 textAlign: 'left',
-                border: location ? '1px solid var(--primary)' : '1px solid var(--border-color)',
-                fontSize: 14,
+                border: location ? '1px solid var(--primary)' : '1px solid transparent',
+                background: 'var(--bg-input)',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: 16,
                 fontWeight: location ? 600 : 400,
               }}
             >
@@ -295,7 +297,6 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
               width: '100%',
               padding: '14px',
               fontSize: 16,
-              opacity: !name.trim() || !location ? 0.6 : 1,
             }}
           >
             {isSubmitting ? '참여 등록 중...' : '참여 완료하고 지도 보기'}
@@ -316,8 +317,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
               position: 'fixed',
               inset: 0,
               zIndex: 100,
-              backgroundColor: 'rgba(0, 0, 0, 0.75)',
-              backdropFilter: 'blur(8px)',
+              backgroundColor: 'rgba(0, 12, 30, 0.45)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -331,13 +331,12 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                 maxWidth: 360,
                 padding: '24px',
                 animation: 'modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <KeyRound size={18} color="#fbbf24" />
-                  <span style={{ fontSize: 16, fontWeight: 700, color: '#f8fafc' }}>
+                  <KeyRound size={18} color="var(--accent-gold)" />
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
                     방장 비밀번호 확인
                   </span>
                 </div>
@@ -379,7 +378,7 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                     style={{ textAlign: 'center', letterSpacing: '0.3em', fontSize: 18, fontWeight: 700 }}
                   />
                   {pinError && (
-                    <div style={{ color: '#ef4444', fontSize: 12, marginTop: 6, textAlign: 'center' }}>
+                    <div style={{ color: 'var(--danger)', fontSize: 12, marginTop: 6, textAlign: 'center' }}>
                       {pinError}
                     </div>
                   )}
@@ -401,7 +400,6 @@ export const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ ro
                     style={{
                       width: '100%',
                       padding: '10px 0',
-                      opacity: inputPin.length !== 4 ? 0.6 : 1,
                     }}
                   >
                     {isVerifyingPin ? '확인 중...' : '확인'}
